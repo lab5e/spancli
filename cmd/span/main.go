@@ -2,17 +2,16 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"time"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/lab5e/spanclient-go"
+	"github.com/lab5e/spanclient-go/v4"
 )
 
 type options struct {
 	Token   string `long:"token" env:"SPAN_API_TOKEN" description:"span API token" required:"yes"`
-	Timeout int    `long:"timeout" description:"timeout in number of seconds"`
+	Timeout int    `long:"timeout" default:"120" description:"timeout in number of seconds"`
 	Debug   bool   `long:"debug" description:"turn on debug output"`
 }
 
@@ -34,9 +33,6 @@ func clientConfig() *spanclient.Configuration {
 	config := spanclient.NewConfiguration()
 	config.Debug = opt.Debug
 	config.Scheme = "https"
-
-	log.Printf("Config: %+v", config)
-
 	return config
 }
 

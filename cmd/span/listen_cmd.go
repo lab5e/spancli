@@ -1,15 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
-	"github.com/lab5e/spanclient-go"
+	"github.com/lab5e/spanclient-go/v4"
 )
 
 type listenCmd struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	DeviceID     string `long:"device-id" env:"SPAN_DEVICE_ID" description:"Span device ID"`
+	DeviceID     string `long:"device-id" description:"Span device ID"`
+	Pretty       bool   `long:"pretty" description:"pretty-print data"`
 }
 
 func init() {
@@ -29,7 +31,18 @@ func (r *listenCmd) Execute([]string) error {
 			return err
 		}
 
-		fmt.Printf("%+v\n", msg)
+		var jsonBytes []byte
+		if r.Pretty {
+			jsonBytes, err = json.MarshalIndent(msg, "", "    ")
+		} else {
+			jsonBytes, err = json.Marshal(msg)
+		}
+		if err != nil {
+			log.Printf("JSON marshalling error: %v", err)
+			continue
+		}
+
+		fmt.Printf("%s\n", jsonBytes)
 	}
 }
 
@@ -38,9 +51,6 @@ func (r *listenCmd) Execute([]string) error {
 // collection.
 func (r *listenCmd) openDataStream() (spanclient.DataStream, error) {
 	ctx, _ := spanContext()
-
-	log.Printf("Context: %+v", ctx)
-
 	if r.DeviceID != "" {
 		return spanclient.NewDeviceDataStream(ctx, clientConfig(), r.CollectionID, r.DeviceID)
 	}
