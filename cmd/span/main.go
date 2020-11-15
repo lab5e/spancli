@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"fmt"
+	"math/rand"
 	"os"
 	"time"
 
@@ -32,7 +35,7 @@ func main() {
 func clientConfig() *spanclient.Configuration {
 	config := spanclient.NewConfiguration()
 	config.Debug = opt.Debug
-	config.Scheme = "https"
+
 	return config
 }
 
@@ -46,4 +49,33 @@ func spanContext() (context.Context, context.CancelFunc) {
 			Prefix: "",
 		}),
 		time.Duration(opt.Timeout)*time.Second)
+}
+
+// verifyDeleteIntent requires the user to type in "yes " followed by
+// a random number so as to avoid accidental deletion.  This can be
+// overridden by including the --yes-i-am-sure flag on the command
+// line.
+func verifyDeleteIntent() bool {
+	rand.Seed(time.Now().UnixNano())
+	verify := fmt.Sprintf("yes %04d", rand.Intn(9999))
+
+	fmt.Printf("\n*** D A N G E R ***\n\nenter '%s' to confirm: ", verify)
+	reader := bufio.NewReader(os.Stdin)
+	text, err := reader.ReadString('\n')
+	if err != nil {
+		return false
+	}
+	return text == (verify + "\n")
+}
+
+// timeToMilliseconds converts a time.Time to milliseconds since epoch
+func timeToMilliseconds(t time.Time) int64 {
+	return t.UnixNano() / int64(time.Millisecond)
+}
+
+func truncateString(s string, n int) string {
+	if len(s) > n && len(s) > 3 {
+		return s[:n-3] + "..."
+	}
+	return s
 }
