@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -53,7 +52,6 @@ func (r *addCollection) Execute([]string) error {
 		},
 		Tags: map[string]string{"name": r.Name},
 	})
-
 	if err != nil {
 		return err
 	}
@@ -101,14 +99,8 @@ func (r *listCollection) Execute([]string) error {
 
 func (r *deleteCollection) Execute([]string) error {
 	if !r.YesIAmSure {
-		fmt.Printf("enter 'yes' to confirm: ")
-		reader := bufio.NewReader(os.Stdin)
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			return err
-		}
-		if text != "yes\n" {
-			return nil
+		if !verifyDeleteIntent() {
+			return fmt.Errorf("user aborted delete")
 		}
 	}
 

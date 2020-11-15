@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"fmt"
+	"math/rand"
 	"os"
 	"time"
 
@@ -46,4 +49,21 @@ func spanContext() (context.Context, context.CancelFunc) {
 			Prefix: "",
 		}),
 		time.Duration(opt.Timeout)*time.Second)
+}
+
+// verifyDeleteIntent requires the user to type in "yes " followed by
+// a random number so as to avoid accidental deletion.  This can be
+// overridden by including the --yes-i-am-sure flag on the command
+// line.
+func verifyDeleteIntent() bool {
+	rand.Seed(time.Now().UnixNano())
+	verify := fmt.Sprintf("yes %04d", rand.Intn(9999))
+
+	fmt.Printf("\n*** D A N G E R ***\n\nenter '%s' to confirm: ", verify)
+	reader := bufio.NewReader(os.Stdin)
+	text, err := reader.ReadString('\n')
+	if err != nil {
+		return false
+	}
+	return text == (verify + "\n")
 }
