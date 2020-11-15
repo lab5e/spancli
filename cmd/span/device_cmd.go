@@ -18,23 +18,23 @@ type deviceCmd struct {
 }
 
 type addDevice struct {
-	CollectionID string `long:"collection-id" description:"collection id" required:"yes"`
+	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	Name         string `long:"name" description:"device name" required:"yes"`
 	IMSI         string `long:"imsi" description:"IMSI of device SIM" required:"yes"`
 	IMEI         string `long:"imei" description:"IMEI of device" required:"yes"`
 }
 
 type getDevice struct {
+	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
-	CollectionID string `long:"collection-id" description:"collection id" required:"yes"`
 }
 
 type listDevice struct {
-	CollectionID string `long:"collection-id" description:"collection id" required:"yes"`
+	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 }
 
 type deleteDevice struct {
-	CollectionID string `long:"collection-id" description:"collection id" required:"yes"`
+	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
 	YesIAmSure   bool   `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
 }

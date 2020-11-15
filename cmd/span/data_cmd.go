@@ -16,7 +16,7 @@ import (
 )
 
 type dataCmd struct {
-	CollectionID string `long:"collection-id" description:"collection id" required:"yes"`
+	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	DeviceID     string `long:"device-id" description:"device id"`
 	Limit        int32  `long:"limit" description:"max number of entries to fetch" default:"30"`
 	Start        string `long:"start" description:"start of time range in milliseconds since epoch"`

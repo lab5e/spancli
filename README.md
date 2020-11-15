@@ -18,6 +18,20 @@ The subcommands are:
 *There is a ws subcommand right now as well, but this will go away in
 the future.*
 
+## Environment variables
+
+In order to make life a bit easier, two of the required command line
+options can be set from the environment.  Also, it is a good idea to
+not use the `--token` option if you can avoid it since this makes your
+token end up in your command line history.
+
+- `--token` option can be set in `SPAN_API_TOKEN`
+- `--collection-id` option can be set in `SPAN_COLLECTION_ID`
+
+If you have these environment variables set you can omit their
+respective options.  If you do specify the command line options they
+will override what is set in the environment.
+
 ## Installing
 
 You can install this utility by issuing the following command.

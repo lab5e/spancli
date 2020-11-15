@@ -23,13 +23,13 @@ type addCollection struct {
 }
 
 type getCollection struct {
-	CollectionID string `long:"collection-id" description:"collection id" required:"yes"`
+	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 }
 
 type listCollection struct{}
 
 type deleteCollection struct {
-	CollectionID string `long:"collection-id" description:"collection id" required:"yes"`
+	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	YesIAmSure   bool   `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
 }
 
