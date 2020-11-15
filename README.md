@@ -4,6 +4,15 @@ The Span command line client aims to be a convenient way to manage
 your Span resources.  This is a work in progress so it might be a good
 idea to check back and update your install of this command.
 
+
+## Installing
+
+You can install this utility by issuing the following command.
+
+    go get -u github.com/lab5e/spancli/cmd/span
+
+## Usage
+
 The general usage of `span` is
 
     span [options] <subcommand> [subcommand options]
@@ -18,6 +27,12 @@ The subcommands are:
 *There is a ws subcommand right now as well, but this will go away in
 the future.*
 
+For more help please refer to the `-h` option:
+
+    span -h
+	span <subcommand> -h
+
+
 ## Environment variables
 
 In order to make life a bit easier, two of the required command line
@@ -31,12 +46,6 @@ token end up in your command line history.
 If you have these environment variables set you can omit their
 respective options.  If you do specify the command line options they
 will override what is set in the environment.
-
-## Installing
-
-You can install this utility by issuing the following command.
-
-    go get -u github.com/lab5e/spancli/cmd/span
 
 ## Requirements
 
