@@ -89,7 +89,7 @@ func (r *listDevice) Execute([]string) error {
 	fmt.Fprintf(w, strings.Join([]string{"DeviceID", "Name", "IMSI", "IMEI", "IP", "At", "Cell", "FW", "State"}, "\t")+"\n")
 	for _, dev := range devices.Devices {
 
-		dev.Tags["name"] = truncateString(dev.Tags["name"], 15)
+		dev.Tags["name"] = truncateString(dev.Tags["name"], 25)
 
 		fmt.Fprintf(w, strings.Join([]string{
 			dev.DeviceId,
