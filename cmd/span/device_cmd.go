@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -14,6 +15,7 @@ type deviceCmd struct {
 	Add    addDevice    `command:"add" description:"create device"`
 	Get    getDevice    `command:"get" description:"get device"`
 	List   listDevice   `command:"list" description:"list devices"`
+	Send   sendDevice   `command:"send" description:"send downstream message"`
 	Delete deleteDevice `command:"delete" description:"delete device"`
 }
 
@@ -31,6 +33,16 @@ type getDevice struct {
 
 type listDevice struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+}
+
+type sendDevice struct {
+	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
+	Port         int32  `long:"port" default:"1234" description:"destination port on device" required:"yes"`
+	Transport    string `long:"transport" choice:"udp" choice:"udp-pull"  choice:"coap" choice:"coap-pull" description:"transport" default:"udp" required:"yes"`
+	CoapPath     string `long:"coap-path" description:"CoAP path"`
+	Text         string `long:"text" description:"text payload" required:"yes"`
+	IsBase64     bool   `long:"base64" description:"indicates that --text is base64 data"`
 }
 
 type deleteDevice struct {
@@ -104,6 +116,26 @@ func (r *listDevice) Execute([]string) error {
 		}, "\t")+"\n")
 	}
 	return w.Flush()
+}
+
+func (r *sendDevice) Execute([]string) error {
+	client := spanclient.NewAPIClient(clientConfig())
+	ctx, _ := spanContext()
+
+	payload := r.Text
+	if !r.IsBase64 {
+		payload = base64.StdEncoding.EncodeToString([]byte(r.Text))
+	}
+
+	_, _, err := client.DevicesApi.SendMessage(ctx, r.CollectionID, r.DeviceID, spanclient.SendMessageRequest{
+		CollectionId: r.CollectionID,
+		DeviceId:     r.DeviceID,
+		Port:         r.Port,
+		Payload:      payload,
+		Transport:    r.Transport,
+		CoapPath:     r.CoapPath,
+	})
+	return err
 }
 
 func (r *deleteDevice) Execute([]string) error {
