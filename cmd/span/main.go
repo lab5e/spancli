@@ -35,7 +35,7 @@ func main() {
 func clientConfig() *spanclient.Configuration {
 	config := spanclient.NewConfiguration()
 	config.Debug = opt.Debug
-	config.Scheme = "https"
+
 	return config
 }
 
@@ -66,4 +66,16 @@ func verifyDeleteIntent() bool {
 		return false
 	}
 	return text == (verify + "\n")
+}
+
+// timeToMilliseconds converts a time.Time to milliseconds since epoch
+func timeToMilliseconds(t time.Time) int64 {
+	return t.UnixNano() / int64(time.Millisecond)
+}
+
+func truncateString(s string, n int) string {
+	if len(s) > n && len(s) > 3 {
+		return s[:n-3] + "..."
+	}
+	return s
 }
