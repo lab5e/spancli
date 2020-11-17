@@ -47,6 +47,27 @@ If you have these environment variables set you can omit their
 respective options.  If you do specify the command line options they
 will override what is set in the environment.
 
+## TAB Completion
+
+In order to get tab completion you can add this to your
+`.bash_profile` or wherever you put your completion settings.
+
+    _completion_span() {
+        # All arguments except the first one
+        args=("${COMP_WORDS[@]:1:$COMP_CWORD}")
+    
+        # Only split on newlines
+        local IFS=$'\n'
+    
+        # Call completion (note that the first element of COMP_WORDS is
+        # the executable itself)
+        COMPREPLY=($(GO_FLAGS_COMPLETION=1 ${COMP_WORDS[0]} "${args[@]}"))
+        return 0
+    }
+    
+    complete -F _completion_span span
+    
+
 ## Requirements
 
 This was written in Go 1.15, so you should have Go 1.15 or a newer
