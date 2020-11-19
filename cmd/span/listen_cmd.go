@@ -1,17 +1,23 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"time"
 
 	"github.com/lab5e/spanclient-go/v4"
 )
 
 type listenCmd struct {
-	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	DeviceID     string `long:"device-id" description:"Span device ID"`
-	Pretty       bool   `long:"pretty" description:"pretty-print data"`
+	CollectionID   string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	DeviceID       string `long:"device-id" description:"Span device ID"`
+	Pretty         bool   `long:"pretty" description:"pretty-print data"`
+	PayloadLogDir  string `long:"payload-log-dir" description:"payload log directory" default:"."`
+	PayloadLogName string `long:"payload-log-name" description:"payload log file prefix" default:"payload"`
+	LogPayload     bool   `long:"log-payload" description:"log payloads to files suffixed with timestamp in nanoseconds"`
 }
 
 func init() {
@@ -29,6 +35,10 @@ func (r *listenCmd) Execute([]string) error {
 		msg, err := ds.Recv()
 		if err != nil {
 			return err
+		}
+
+		if r.LogPayload {
+			r.logPayload(msg.Payload)
 		}
 
 		var jsonBytes []byte
@@ -55,4 +65,19 @@ func (r *listenCmd) openDataStream() (spanclient.DataStream, error) {
 		return spanclient.NewDeviceDataStream(ctx, clientConfig(), r.CollectionID, r.DeviceID)
 	}
 	return spanclient.NewCollectionDataStream(ctx, clientConfig(), r.CollectionID)
+}
+
+func (r *listenCmd) logPayload(payload string) {
+	data, err := base64.StdEncoding.DecodeString(payload)
+	if err != nil {
+		log.Printf("error base64-decoding payload: %v", err)
+		return
+	}
+
+	filename := fmt.Sprintf("%s/%s-%d", r.PayloadLogDir, r.PayloadLogName, time.Now().UnixNano())
+	err = ioutil.WriteFile(filename, data, 0644)
+	if err != nil {
+		log.Fatalf("Error writing payload to %s: %v", filename, err)
+	}
+	log.Printf("wrote file: %s", filename)
 }
