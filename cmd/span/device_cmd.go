@@ -39,7 +39,7 @@ type sendDevice struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
 	Port         int32  `long:"port" default:"1234" description:"destination port on device" required:"yes"`
-	Transport    string `long:"transport" choice:"udp" choice:"udp-pull"  choice:"coap" choice:"coap-pull" description:"transport" default:"udp" required:"yes"`
+	Transport    string `long:"transport" choice:"udp-push" choice:"udp-pull"  choice:"coap-push" choice:"coap-pull" description:"transport" required:"yes"`
 	CoapPath     string `long:"coap-path" description:"CoAP path"`
 	Text         string `long:"text" description:"text payload" required:"yes"`
 	IsBase64     bool   `long:"base64" description:"indicates that --text is base64 data"`
