@@ -16,6 +16,11 @@ type options struct {
 	Token   string `long:"token" env:"SPAN_API_TOKEN" description:"span API token" required:"yes"`
 	Timeout int    `long:"timeout" default:"120" description:"timeout in number of seconds"`
 	Debug   bool   `long:"debug" description:"turn on debug output"`
+
+	Collection collectionCmd `command:"collection" alias:"col" description:"collection management"`
+	Device     deviceCmd     `command:"device" alias:"dev" description:"device management"`
+	Data       dataCmd       `command:"data" description:"data listing commands"`
+	Listen     listenCmd     `command:"listen" description:"live streaming of data"`
 }
 
 var opt options
@@ -66,11 +71,6 @@ func verifyDeleteIntent() bool {
 		return false
 	}
 	return text == (verify + "\n")
-}
-
-// timeToMilliseconds converts a time.Time to milliseconds since epoch
-func timeToMilliseconds(t time.Time) int64 {
-	return t.UnixNano() / int64(time.Millisecond)
 }
 
 func truncateString(s string, n int) string {

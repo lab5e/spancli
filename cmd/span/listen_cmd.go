@@ -20,10 +20,6 @@ type listenCmd struct {
 	LogPayload     bool   `long:"log-payload" description:"log payloads to files suffixed with timestamp in nanoseconds"`
 }
 
-func init() {
-	parser.AddCommand("listen", "Listen for messages from Span", "Listen for messages from Span", &listenCmd{})
-}
-
 func (r *listenCmd) Execute([]string) error {
 	ds, err := r.openDataStream()
 	if err != nil {

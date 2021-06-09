@@ -27,10 +27,6 @@ type dataCmd struct {
 	JSONPretty   bool   `long:"pretty" description:"output as indented JSON"`
 }
 
-func init() {
-	parser.AddCommand("data", "list data from device or collection", "list data from device or collection", &dataCmd{})
-}
-
 func (r *dataCmd) Execute([]string) error {
 	if r.DeviceID == "" {
 		return r.listCollectionData()

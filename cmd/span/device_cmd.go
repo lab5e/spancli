@@ -14,9 +14,9 @@ import (
 type deviceCmd struct {
 	Add    addDevice    `command:"add" description:"create device"`
 	Get    getDevice    `command:"get" description:"get device"`
-	List   listDevice   `command:"list" description:"list devices"`
+	List   listDevice   `command:"list" alias:"ls" description:"list devices"`
 	Send   sendDevice   `command:"send" description:"send downstream message"`
-	Delete deleteDevice `command:"delete" description:"delete device"`
+	Delete deleteDevice `command:"delete" alias:"del" description:"delete device"`
 }
 
 type addDevice struct {
@@ -49,10 +49,6 @@ type deleteDevice struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
 	YesIAmSure   bool   `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
-}
-
-func init() {
-	parser.AddCommand("device", "device management commands", "device management commands", &deviceCmd{})
 }
 
 func (r *addDevice) Execute([]string) error {

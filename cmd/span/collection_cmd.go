@@ -13,8 +13,8 @@ import (
 type collectionCmd struct {
 	Add    addCollection    `command:"add" description:"create collection"`
 	Get    getCollection    `command:"get" description:"get collection"`
-	List   listCollection   `command:"list" description:"list collections"`
-	Delete deleteCollection `command:"delete" description:"delete collection"`
+	List   listCollection   `command:"list" alias:"ls" description:"list collections"`
+	Delete deleteCollection `command:"delete" alias:"del" description:"delete collection"`
 }
 
 type addCollection struct {
@@ -31,10 +31,6 @@ type listCollection struct{}
 type deleteCollection struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	YesIAmSure   bool   `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
-}
-
-func init() {
-	parser.AddCommand("collection", "collection management commands", "collection management commands", &collectionCmd{})
 }
 
 func (r *addCollection) Execute([]string) error {
