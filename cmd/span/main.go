@@ -13,9 +13,9 @@ import (
 )
 
 type options struct {
-	Token   string `long:"token" env:"SPAN_API_TOKEN" description:"span API token" required:"yes"`
-	Timeout int    `long:"timeout" default:"120" description:"timeout in number of seconds"`
-	Debug   bool   `long:"debug" description:"turn on debug output"`
+	Token   string        `long:"token" env:"SPAN_API_TOKEN" description:"span API token" required:"yes"`
+	Timeout time.Duration `long:"timeout" default:"15s" description:"timeout for operation"`
+	Debug   bool          `long:"debug" description:"turn on debug output"`
 
 	Collection collectionCmd `command:"collection" alias:"col" description:"collection management"`
 	Device     deviceCmd     `command:"device" alias:"dev" description:"device management"`
@@ -42,12 +42,17 @@ func main() {
 			case flags.ErrRequired:
 				os.Exit(1)
 
+			case flags.ErrUnknownFlag:
+				os.Exit(1)
+
+			case flags.ErrMarshal:
+				os.Exit(1)
+
 			default:
 				fmt.Printf("%v [%d]\n", err, flagsErr.Type)
 				os.Exit(0)
 			}
 		}
-		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 }

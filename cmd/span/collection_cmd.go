@@ -1,13 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"os"
-	"strings"
-	"text/tabwriter"
 
-	"github.com/lab5e/spanclient-go/v4"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/lab5e/go-spanapi/v4"
+	"github.com/lab5e/go-spanapi/v4/apitools"
 )
 
 type collectionCmd struct {
@@ -26,88 +26,51 @@ type getCollection struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 }
 
-type listCollection struct{}
+type listCollection struct {
+	Format   string `long:"format" default:"text" description:"which output format to use" choice:"csv" choice:"html" choice:"markdown" choice:"text" choice:"json"`
+	NoColor  bool   `long:"no-color" env:"SPAN_NO_COLOR" description:"turn off coloring"`
+	PageSize int    `long:"page-size" description:"if set, chop output into pages of page-size length"`
+}
 
 type deleteCollection struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	YesIAmSure   bool   `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
 }
 
-func (r *addCollection) Execute([]string) error {
-	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
-	collection, _, err := client.CollectionsApi.CreateCollection(ctx, spanclient.Collection{
-		TeamId: r.TeamID,
-		FieldMask: spanclient.FieldMask{
-			Imsi:     false,
-			Imei:     false,
-			Location: false,
-		},
-		Firmware: spanclient.CollectionFirmware{
-			Management: spanclient.DISABLED,
-		},
-		Tags: map[string]string{"name": r.Name},
-	})
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("created collection with id '%s'\n", collection.CollectionId)
-	return nil
-}
-
-func (r *getCollection) Execute([]string) error {
-	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
-	collection, _, err := client.CollectionsApi.RetrieveCollection(ctx, r.CollectionID)
-	if err != nil {
-		return err
-	}
-	json, err := json.MarshalIndent(collection, "", "    ")
-	if err != nil {
-		return fmt.Errorf("unable to marshal '%v' to JSON: %v", collection, err)
-	}
-	fmt.Printf("%s\n", json)
-	return nil
-}
-
 func (r *listCollection) Execute([]string) error {
-	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	client, ctx, done := newClient()
+	defer done()
 
-	collections, _, err := client.CollectionsApi.ListCollections(ctx)
+	collections, _, err := client.CollectionsApi.ListCollections(ctx).Execute()
 	if err != nil {
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 5, ' ', 0)
-	fmt.Fprintf(w, strings.Join([]string{"CollectionID", "TeamID", "Name"}, "\t")+"\n")
-
-	for _, col := range collections.Collections {
-		fmt.Fprintf(w, strings.Join([]string{
-			col.CollectionId,
-			col.TeamId,
-			col.Tags["name"],
-		}, "\t")+"\n")
+	// treat JSON formatting as special case that dumps all data
+	if r.Format == "json" {
+		json, err := json.MarshalIndent(collections, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\n", json)
+		return nil
 	}
-	return w.Flush()
+
+	t := newTableOutput(r.Format, r.NoColor, r.PageSize)
+	t.SetTitle("Collections")
+	t.AppendHeader(table.Row{"ID", "Name", "TeamID"})
+	for _, col := range *collections.Collections {
+		t.AppendRow([]interface{}{*col.CollectionId, col.GetTags()["name"], *col.TeamId})
+	}
+	renderTable(t, r.Format)
+	return nil
 }
 
-func (r *deleteCollection) Execute([]string) error {
-	if !r.YesIAmSure {
-		if !verifyDeleteIntent() {
-			return fmt.Errorf("user aborted delete")
-		}
-	}
+func newClient() (*spanapi.APIClient, context.Context, context.CancelFunc) {
+	config := spanapi.NewConfiguration()
+	config.Debug = opt.Debug
 
-	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, done := apitools.ContextWithAuthAndTimeout(opt.Token, opt.Timeout)
 
-	_, _, err := client.CollectionsApi.DeleteCollection(ctx, r.CollectionID)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("deleted collection '%s'\n", r.CollectionID)
-	return nil
+	return spanapi.NewAPIClient(config), ctx, done
 }
