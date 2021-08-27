@@ -28,11 +28,27 @@ var parser = flags.NewParser(&opt, flags.Default)
 
 func main() {
 	if _, err := parser.Parse(); err != nil {
-		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
-			os.Exit(0)
-		} else {
-			os.Exit(1)
+		if flagsErr, ok := err.(*flags.Error); ok {
+			switch flagsErr.Type {
+			case flags.ErrHelp:
+				os.Exit(0)
+
+			case flags.ErrCommandRequired:
+				os.Exit(1)
+
+			case flags.ErrUnknownCommand:
+				os.Exit(1)
+
+			case flags.ErrRequired:
+				os.Exit(1)
+
+			default:
+				fmt.Printf("%v [%d]\n", err, flagsErr.Type)
+				os.Exit(0)
+			}
 		}
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
 	}
 }
 

@@ -99,7 +99,7 @@ func (r *dataCmd) listData(data *spanclient.ListDataResponse) error {
 				jsonData, err = json.Marshal(d)
 			}
 			if err != nil {
-				return fmt.Errorf("Error marshalling to JSON: %v", err)
+				return fmt.Errorf("error marshalling to JSON: %v", err)
 			}
 
 			if r.JSONPretty {
