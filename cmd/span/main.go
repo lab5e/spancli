@@ -3,12 +3,18 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/jessevdk/go-flags"
+	"github.com/lab5e/go-spanapi/v4"
+	"github.com/lab5e/go-spanapi/v4/apitools"
 	"github.com/lab5e/spanclient-go/v4"
 )
 
@@ -48,6 +54,9 @@ func main() {
 			case flags.ErrMarshal:
 				os.Exit(1)
 
+			case flags.ErrExpectedArgument:
+				os.Exit(1)
+
 			default:
 				fmt.Printf("%v [%d]\n", err, flagsErr.Type)
 				os.Exit(0)
@@ -55,6 +64,40 @@ func main() {
 		}
 		os.Exit(1)
 	}
+}
+
+// apiError creates an error instance based on error message
+// and HTTP response returned from API call.
+func apiError(res *http.Response, e error) error {
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		// If we can't read the body, just return the error from the API
+		return e
+	}
+
+	var errmsg struct {
+		Status  int    `json:"status"`
+		Message string `json:"message"`
+	}
+
+	err = json.Unmarshal(body, &errmsg)
+	if err != nil {
+		// If we can't extract the error message we just return the error from the API
+		return e
+	}
+
+	return fmt.Errorf("%s: %s", res.Status, errmsg.Message)
+}
+
+// newClient creates a new client based on the command line options and/or
+// defaults.
+func newClient() (*spanapi.APIClient, context.Context, context.CancelFunc) {
+	config := spanapi.NewConfiguration()
+	config.Debug = opt.Debug
+
+	ctx, done := apitools.ContextWithAuthAndTimeout(opt.Token, opt.Timeout)
+
+	return spanapi.NewAPIClient(config), ctx, done
 }
 
 // Create spanclient.Configuration based on the command line options.
@@ -85,7 +128,8 @@ func verifyDeleteIntent() bool {
 	rand.Seed(time.Now().UnixNano())
 	verify := fmt.Sprintf("yes %04d", rand.Intn(9999))
 
-	fmt.Printf("\n*** D A N G E R ***\n\nenter '%s' to confirm: ", verify)
+	fmt.Printf("\n%s\n\n", text.Colors{text.BgRed, text.FgWhite}.Sprint("*** D A N G E R ***"))
+	fmt.Printf("enter '%s' to confirm: ", verify)
 	reader := bufio.NewReader(os.Stdin)
 	text, err := reader.ReadString('\n')
 	if err != nil {

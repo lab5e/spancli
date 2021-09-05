@@ -1,13 +1,11 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/lab5e/go-spanapi/v4"
-	"github.com/lab5e/go-spanapi/v4/apitools"
 )
 
 type collectionCmd struct {
@@ -18,12 +16,16 @@ type collectionCmd struct {
 }
 
 type addCollection struct {
-	TeamID string `long:"team-id" description:"team the collection belongs to" required:"yes"`
-	Name   string `long:"name" description:"name of the collection" required:"yes"`
+	TeamID       string `long:"team-id" description:"team the collection belongs to"`
+	Name         string `long:"name" description:"name of the collection" required:"yes"`
+	MaskIMSI     bool   `long:"mask-imsi" description:"mask IMSI"`
+	MaskIMEI     bool   `long:"mask-imei" description:"mask IMEI"`
+	MaskLocation bool   `long:"mask-location" description:"mask location"`
+	MaskMSISDN   bool   `long:"mask-msisdn" description:"mask MSISDN (phone number)"`
 }
 
 type getCollection struct {
-	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	CollectionID string `long:"collection-id" description:"Span collection ID" required:"yes"`
 }
 
 type listCollection struct {
@@ -33,20 +35,80 @@ type listCollection struct {
 }
 
 type deleteCollection struct {
-	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	CollectionID string `long:"collection-id" description:"Span collection ID" required:"yes"`
 	YesIAmSure   bool   `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
 }
 
+func (r *addCollection) Execute([]string) error {
+	client, ctx, cancel := newClient()
+	defer cancel()
+
+	collection := spanapi.Collection{
+		TeamId: &r.TeamID,
+		FieldMask: &spanapi.FieldMask{
+			Imsi:     &r.MaskIMSI,
+			Imei:     &r.MaskIMEI,
+			Msisdn:   &r.MaskMSISDN,
+			Location: &r.MaskLocation,
+		},
+		Tags: &map[string]string{"name": r.Name},
+	}
+
+	col, res, err := client.CollectionsApi.CreateCollection(ctx).Body(collection).Execute()
+	if err != nil {
+		return apiError(res, err)
+	}
+
+	fmt.Printf("created collection '%s' with id '%s'\n", r.Name, *col.CollectionId)
+	return nil
+}
+
+func (r *getCollection) Execute([]string) error {
+	client, ctx, cancel := newClient()
+	defer cancel()
+
+	col, res, err := client.CollectionsApi.RetrieveCollection(ctx, r.CollectionID).Execute()
+	if err != nil {
+		return apiError(res, err)
+	}
+
+	jsonData, err := json.MarshalIndent(col, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s\n", string(jsonData))
+	return nil
+}
+
+func (r *deleteCollection) Execute([]string) error {
+	client, ctx, cancel := newClient()
+	defer cancel()
+
+	if !r.YesIAmSure {
+		if !verifyDeleteIntent() {
+			return fmt.Errorf("user aborted delete")
+		}
+	}
+
+	col, res, err := client.CollectionsApi.DeleteCollection(ctx, r.CollectionID).Execute()
+	if err != nil {
+		return apiError(res, err)
+	}
+
+	fmt.Printf("deleted collection '%s'", *col.CollectionId)
+	return nil
+}
+
 func (r *listCollection) Execute([]string) error {
-	client, ctx, done := newClient()
-	defer done()
+	client, ctx, cancel := newClient()
+	defer cancel()
 
 	collections, _, err := client.CollectionsApi.ListCollections(ctx).Execute()
 	if err != nil {
 		return err
 	}
 
-	// treat JSON formatting as special case that dumps all data
 	if r.Format == "json" {
 		json, err := json.MarshalIndent(collections, "", "  ")
 		if err != nil {
@@ -64,13 +126,4 @@ func (r *listCollection) Execute([]string) error {
 	}
 	renderTable(t, r.Format)
 	return nil
-}
-
-func newClient() (*spanapi.APIClient, context.Context, context.CancelFunc) {
-	config := spanapi.NewConfiguration()
-	config.Debug = opt.Debug
-
-	ctx, done := apitools.ContextWithAuthAndTimeout(opt.Token, opt.Timeout)
-
-	return spanapi.NewAPIClient(config), ctx, done
 }
