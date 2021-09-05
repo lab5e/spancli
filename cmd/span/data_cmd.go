@@ -1,24 +1,19 @@
 package main
 
 import (
-	"encoding/base64"
-	"encoding/json"
+	"context"
 	"fmt"
-	"os"
 	"strconv"
-	"strings"
-	"text/tabwriter"
 	"time"
-	"unicode"
 
-	"github.com/antihax/optional"
-	"github.com/lab5e/spanclient-go/v4"
+	"github.com/lab5e/go-spanapi/v4"
 )
 
 type dataCmd struct {
-	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	CollectionID string `long:"collection-id" description:"Span collection ID" required:"yes"`
 	DeviceID     string `long:"device-id" description:"device id"`
 	Limit        int32  `long:"limit" description:"max number of entries to fetch" default:"30"`
+	BatchSize    int32  `long:"batch-size" description:"size of batches we request from Span" default:"500"`
 	Start        string `long:"start" description:"start of time range in milliseconds since epoch"`
 	End          string `long:"end" description:"end of time range in milliseconds since epoch"`
 	Decode       bool   `long:"decode" description:"decode payload"`
@@ -28,134 +23,143 @@ type dataCmd struct {
 }
 
 func (r *dataCmd) Execute([]string) error {
+	client, ctx, cancel := newClient()
+	defer cancel()
+
 	if r.DeviceID == "" {
-		return r.listCollectionData()
+		return r.listCollectionData(client, ctx)
 	}
-	return r.listDeviceData()
+	return r.listDeviceData(client, ctx)
 }
 
-func (r *dataCmd) listDeviceData() error {
-	opts := &spanclient.ListDeviceDataOpts{
-		Limit: optional.NewInt32(r.Limit),
+func (r *dataCmd) listCollectionData(client *spanapi.APIClient, ctx context.Context) error {
+	rowCount := int32(0)
+	lastMessageID := ""
+
+	if r.BatchSize > r.Limit {
+		r.BatchSize = r.Limit
 	}
 
-	if r.Start != "" {
-		opts.End = optional.NewString(r.End)
+	start := int64(0)
+	end := int64(time.Now().UnixNano() / time.Hour.Milliseconds())
+
+	for {
+		// Don't ask for more than we need
+		remainder := r.Limit - rowCount
+		if remainder < r.BatchSize {
+			r.BatchSize = remainder
+			fmt.Printf("\nREMAINDER %d\n", remainder)
+		}
+
+		req := client.CollectionsApi.
+			ListCollectionData(ctx, r.CollectionID).
+			Limit(r.BatchSize).
+			Offset(lastMessageID)
+
+		// First time around the loop we use the start and end parameters
+		if rowCount == 0 {
+			req = req.
+				Start(fmt.Sprintf("%d", start)).
+				End(fmt.Sprintf("%d", end))
+		} else {
+			req.Offset(lastMessageID)
+		}
+
+		items, res, err := req.Execute()
+		if err != nil {
+			return apiError(res, err)
+		}
+
+		if items.Data == nil || len(*items.Data) == 0 {
+			// Zero rows returned
+			return nil
+		}
+
+		for _, data := range *items.Data {
+			// bail out if we have reached the end of the interval
+			ms, _ := receivedToTime(*data.Received)
+			if ms < start {
+				fmt.Printf("End of interval, %d rows returned\n", rowCount)
+				return nil
+			}
+
+			fmt.Printf("%6d | %s %s %s %s\n", rowCount, *data.Received, *data.MessageId, *data.Device.DeviceId, *data.Payload)
+			lastMessageID = *data.MessageId
+			rowCount++
+
+			if rowCount >= r.Limit {
+				return nil
+			}
+		}
+	}
+}
+
+func (r *dataCmd) listDeviceData(client *spanapi.APIClient, ctx context.Context) error {
+	rowCount := int32(0)
+	lastMessageID := ""
+
+	if r.BatchSize > r.Limit {
+		r.BatchSize = r.Limit
 	}
 
-	if r.End != "" {
-		opts.End = optional.NewString(r.Start)
-	}
+	start := int64(0)
+	end := int64(time.Now().UnixNano() / time.Hour.Milliseconds())
 
-	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
-	data, _, err := client.DevicesApi.ListDeviceData(ctx, r.CollectionID, r.DeviceID, opts)
+	for {
+		// Don't ask for more than we need
+		remainder := r.Limit - rowCount
+		if remainder < r.BatchSize {
+			r.BatchSize = remainder
+			fmt.Printf("\nREMAINDER %d\n", remainder)
+		}
+
+		req := client.DevicesApi.
+			ListDeviceData(ctx, r.CollectionID, r.DeviceID).
+			Limit(r.BatchSize).
+			Offset(lastMessageID)
+
+		// First time around the loop we use the start and end parameters
+		if rowCount == 0 {
+			req = req.
+				Start(fmt.Sprintf("%d", start)).
+				End(fmt.Sprintf("%d", end))
+		} else {
+			req.Offset(lastMessageID)
+		}
+
+		items, res, err := req.Execute()
+		if err != nil {
+			return apiError(res, err)
+		}
+
+		if items.Data == nil || len(*items.Data) == 0 {
+			// Zero rows returned
+			return nil
+		}
+
+		for _, data := range *items.Data {
+			// bail out if we have reached the end of the interval
+			ms, _ := receivedToTime(*data.Received)
+			if ms < start {
+				fmt.Printf("End of interval, %d rows returned\n", rowCount)
+				return nil
+			}
+
+			fmt.Printf("%6d | %s %s %s %s\n", rowCount, *data.Received, *data.MessageId, *data.Device.DeviceId, *data.Payload)
+			lastMessageID = *data.MessageId
+			rowCount++
+
+			if rowCount >= r.Limit {
+				return nil
+			}
+		}
+	}
+}
+
+func receivedToTime(ts string) (int64, time.Time) {
+	r, err := strconv.ParseInt(ts, 10, 63)
 	if err != nil {
-		return err
+		return time.Now().UnixNano() / int64(time.Millisecond), time.Now()
 	}
-
-	return r.listData(&data)
-}
-
-func (r *dataCmd) listCollectionData() error {
-	opts := &spanclient.ListCollectionDataOpts{
-		Limit: optional.NewInt32(r.Limit),
-	}
-
-	if r.Start != "" {
-		opts.End = optional.NewString(r.End)
-	}
-
-	if r.End != "" {
-		opts.End = optional.NewString(r.Start)
-	}
-
-	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
-	data, _, err := client.CollectionsApi.ListCollectionData(ctx, r.CollectionID, opts)
-	if err != nil {
-		return err
-	}
-
-	return r.listData(&data)
-}
-
-func (r *dataCmd) listData(data *spanclient.ListDataResponse) error {
-	if r.JSONOutput {
-		fmt.Print("[")
-
-		if r.JSONPretty {
-			fmt.Print("\n")
-		}
-
-		for n, d := range data.Data {
-
-			var jsonData []byte
-			var err error
-
-			if r.JSONPretty {
-				jsonData, err = json.MarshalIndent(d, "  ", "    ")
-			} else {
-				jsonData, err = json.Marshal(d)
-			}
-			if err != nil {
-				return fmt.Errorf("error marshalling to JSON: %v", err)
-			}
-
-			if r.JSONPretty {
-				fmt.Printf("  ")
-			}
-
-			fmt.Print(string(jsonData))
-
-			if n < len(data.Data)-1 {
-				fmt.Print(",")
-			}
-			if r.JSONPretty {
-				fmt.Print("\n")
-			}
-
-		}
-		fmt.Printf("]\n")
-		return nil
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-	fmt.Fprintf(w, strings.Join([]string{"DeviceID", "Name", "Trans", "Received", "Payload"}, "\t")+"\n")
-
-	for _, d := range data.Data {
-
-		if r.ISODate {
-			received, err := strconv.ParseInt(d.Received, 10, 64)
-			if err == nil {
-				d.Received = time.Unix(0, received*int64(time.Millisecond)).Format(time.RFC3339)
-			}
-		}
-
-		if r.Decode {
-			data, err := base64.StdEncoding.DecodeString(d.Payload)
-			if err == nil {
-
-				clean := strings.Map(func(r rune) rune {
-					if unicode.IsPrint(r) {
-						return r
-					}
-					return -1
-				}, string(data))
-
-				d.Payload = "'" + clean + "'"
-			}
-		}
-
-		fmt.Fprintf(w, strings.Join([]string{
-			d.Device.DeviceId,
-			d.Device.Tags["name"],
-			d.Transport,
-			d.Received,
-			d.Payload,
-		}, "\t")+"\n")
-	}
-
-	return w.Flush()
-
+	return r, time.Unix(0, r*int64(time.Millisecond))
 }
