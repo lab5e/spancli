@@ -20,10 +20,10 @@ type deviceCmd struct {
 }
 
 type addDevice struct {
-	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	Name         string `long:"name" description:"device name" required:"no"`
-	IMSI         string `long:"imsi" description:"IMSI of device SIM" required:"yes"`
-	IMEI         string `long:"imei" description:"IMEI of device" required:"yes"`
+	CollectionID string   `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	IMSI         string   `long:"imsi" description:"IMSI of device SIM" required:"yes"`
+	IMEI         string   `long:"imei" description:"IMEI of device" required:"yes"`
+	Tags         []string `long:"tag" short:"t" description:"Set tag value (name:value)"`
 }
 
 type getDevice struct {
@@ -52,6 +52,10 @@ type deleteDevice struct {
 }
 
 func (r *addDevice) Execute([]string) error {
+	tags, err := tagsToMap(r.Tags)
+	if err != nil {
+		return err
+	}
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
 
@@ -59,7 +63,7 @@ func (r *addDevice) Execute([]string) error {
 		CollectionId: r.CollectionID,
 		Imsi:         r.IMSI,
 		Imei:         r.IMEI,
-		Tags:         map[string]string{"name": r.Name},
+		Tags:         tags,
 	})
 	if err != nil {
 		return err
@@ -94,16 +98,10 @@ func (r *listDevice) Execute([]string) error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-	fmt.Fprintf(w, strings.Join([]string{"DeviceID", "Name", "IMSI", "IMEI", "IP", "At", "Cell", "FW", "State"}, "\t")+"\n")
+	fmt.Fprintf(w, strings.Join([]string{"DeviceID", "IMSI", "IMEI", "IP", "At", "Cell", "FW version", "State", "Tags"}, "\t")+"\n")
 	for _, dev := range devices.Devices {
-		var name string
-		if dev.Tags != nil {
-			name = truncateString(dev.Tags["name"], 25)
-		}
-
 		fmt.Fprintf(w, strings.Join([]string{
 			dev.DeviceId,
-			name,
 			dev.Imsi,
 			dev.Imei,
 			dev.Network.AllocatedIp,
@@ -111,6 +109,7 @@ func (r *listDevice) Execute([]string) error {
 			dev.Network.CellId,
 			dev.Firmware.FirmwareVersion,
 			dev.Firmware.State,
+			tagsToString(dev.Tags),
 		}, "\t")+"\n")
 	}
 	return w.Flush()

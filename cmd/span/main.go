@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -99,13 +100,6 @@ func verifyDeleteIntent() bool {
 	return text == (verify + "\n")
 }
 
-func truncateString(s string, n int) string {
-	if len(s) > n && len(s) > 3 {
-		return s[:n-3] + "..."
-	}
-	return s
-}
-
 // tagsToString converts a tag struct to a name:value list of strings. The name
 // tag (if it is set) is placed first since it makes it easier to read the list
 func tagsToString(tags map[string]string) string {
@@ -126,4 +120,16 @@ func tagsToString(tags map[string]string) string {
 	}
 
 	return strings.Join(ret, "  ")
+}
+
+func tagsToMap(param []string) (map[string]string, error) {
+	tags := make(map[string]string)
+	for _, str := range param {
+		nameValue := strings.Split(str, ":")
+		if len(nameValue) != 2 {
+			return nil, errors.New("invalid tag format, needs name:value string")
+		}
+		tags[strings.TrimSpace(nameValue[0])] = strings.TrimSpace(nameValue[1])
+	}
+	return tags, nil
 }

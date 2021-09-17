@@ -42,13 +42,9 @@ type updateCollection struct {
 }
 
 func (r *addCollection) Execute([]string) error {
-	tags := make(map[string]string)
-	for _, str := range r.Tags {
-		nameValue := strings.Split(str, ":")
-		if len(nameValue) != 2 {
-			return errors.New("invalid tag format, needs name:value string")
-		}
-		tags[strings.TrimSpace(nameValue[0])] = strings.TrimSpace(nameValue[1])
+	tags, err := tagsToMap(r.Tags)
+	if err != nil {
+		return err
 	}
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
