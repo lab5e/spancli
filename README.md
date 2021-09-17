@@ -16,13 +16,14 @@ You can install this utility by issuing the following command.
 The general usage of `span` is
 
     span [options] <subcommand> [subcommand options]
-	
+
 The subcommands are:
 
     collection  collection management commands
     data        list data from device or collection
     device      device management commands
     listen      listen for messages from Span
+    output      manage outputs
 
 *There is a ws subcommand right now as well, but this will go away in
 the future.*
@@ -55,18 +56,18 @@ In order to get tab completion you can add this to your
     _completion_span() {
         # All arguments except the first one
         args=("${COMP_WORDS[@]:1:$COMP_CWORD}")
-    
+
         # Only split on newlines
         local IFS=$'\n'
-    
+
         # Call completion (note that the first element of COMP_WORDS is
         # the executable itself)
         COMPREPLY=($(GO_FLAGS_COMPLETION=1 ${COMP_WORDS[0]} "${args[@]}"))
         return 0
     }
-    
+
     complete -F _completion_span span
-    
+
 
 ## Requirements
 
