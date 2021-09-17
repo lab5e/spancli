@@ -21,8 +21,8 @@ type collectionCmd struct {
 }
 
 type addCollection struct {
-	TeamID string `long:"team-id" description:"team the collection belongs to" required:"yes"`
-	Name   string `long:"name" description:"name of the collection" required:"yes"`
+	TeamID string   `long:"team-id" description:"team the collection belongs to" required:"yes"`
+	Tags   []string `long:"tag" short:"t" description:"Set tag value (name:value)"`
 }
 
 type getCollection struct {
@@ -42,6 +42,14 @@ type updateCollection struct {
 }
 
 func (r *addCollection) Execute([]string) error {
+	tags := make(map[string]string)
+	for _, str := range r.Tags {
+		nameValue := strings.Split(str, ":")
+		if len(nameValue) != 2 {
+			return errors.New("invalid tag format, needs name:value string")
+		}
+		tags[strings.TrimSpace(nameValue[0])] = strings.TrimSpace(nameValue[1])
+	}
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
 	collection, _, err := client.CollectionsApi.CreateCollection(ctx, spanclient.Collection{
@@ -54,7 +62,7 @@ func (r *addCollection) Execute([]string) error {
 		Firmware: spanclient.CollectionFirmware{
 			Management: spanclient.DISABLED,
 		},
-		Tags: map[string]string{"name": r.Name},
+		Tags: tags,
 	})
 	if err != nil {
 		return err
