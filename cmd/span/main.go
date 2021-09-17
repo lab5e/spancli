@@ -23,6 +23,7 @@ type options struct {
 	Device     deviceCmd     `command:"device" alias:"dev" description:"device management"`
 	Data       dataCmd       `command:"data" description:"data listing commands"`
 	Listen     listenCmd     `command:"listen" description:"live streaming of data"`
+	Output     outputCmd     `command:"output" alias:"out" description:"output management"`
 }
 
 var opt options
