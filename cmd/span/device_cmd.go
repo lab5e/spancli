@@ -21,7 +21,7 @@ type deviceCmd struct {
 
 type addDevice struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	Name         string `long:"name" description:"device name" required:"yes"`
+	Name         string `long:"name" description:"device name" required:"no"`
 	IMSI         string `long:"imsi" description:"IMSI of device SIM" required:"yes"`
 	IMEI         string `long:"imei" description:"IMEI of device" required:"yes"`
 }
