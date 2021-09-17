@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"text/tabwriter"
@@ -15,6 +17,7 @@ type collectionCmd struct {
 	Get    getCollection    `command:"get" description:"get collection"`
 	List   listCollection   `command:"list" alias:"ls" description:"list collections"`
 	Delete deleteCollection `command:"delete" alias:"del" description:"delete collection"`
+	Update updateCollection `command:"update" alias:"up" description:"update collection"`
 }
 
 type addCollection struct {
@@ -31,6 +34,11 @@ type listCollection struct{}
 type deleteCollection struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	YesIAmSure   bool   `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
+}
+
+type updateCollection struct {
+	CollectionID string   `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	Tags         []string `long:"tag" short:"t" description:"Set tag value (name:value)"`
 }
 
 func (r *addCollection) Execute([]string) error {
@@ -81,13 +89,14 @@ func (r *listCollection) Execute([]string) error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 5, ' ', 0)
-	fmt.Fprintf(w, strings.Join([]string{"CollectionID", "TeamID", "Name"}, "\t")+"\n")
+	fmt.Fprintf(w, strings.Join([]string{"CollectionID", "TeamID", "FW Mgmt", "Tags"}, "\t")+"\n")
 
 	for _, col := range collections.Collections {
 		fmt.Fprintf(w, strings.Join([]string{
 			col.CollectionId,
 			col.TeamId,
-			col.Tags["name"],
+			string(col.Firmware.Management),
+			tagsToString(col.Tags),
 		}, "\t")+"\n")
 	}
 	return w.Flush()
@@ -109,5 +118,35 @@ func (r *deleteCollection) Execute([]string) error {
 	}
 
 	fmt.Printf("deleted collection '%s'\n", r.CollectionID)
+	return nil
+}
+
+func (u *updateCollection) Execute([]string) error {
+	client := spanclient.NewAPIClient(clientConfig())
+	ctx, cancel := spanContext()
+	defer cancel()
+
+	collection, resp, err := client.CollectionsApi.RetrieveCollection(ctx, u.CollectionID)
+	if err != nil {
+		if resp.StatusCode == http.StatusNotFound {
+			return errors.New("unknown collection")
+		}
+		return err
+	}
+	if collection.Tags == nil {
+		collection.Tags = make(map[string]string)
+	}
+	for _, val := range u.Tags {
+		nameValue := strings.Split(val, ":")
+		if len(nameValue) != 2 {
+			return errors.New("tag name incorrectly formatted (needs name:value)")
+		}
+		collection.Tags[nameValue[0]] = nameValue[1]
+	}
+	_, _, err = client.CollectionsApi.UpdateCollection(ctx, u.CollectionID, collection)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("updated collection '%s'\n", u.CollectionID)
 	return nil
 }

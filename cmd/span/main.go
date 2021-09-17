@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/jessevdk/go-flags"
@@ -47,7 +48,8 @@ func main() {
 				os.Exit(0)
 			}
 		}
-		fmt.Printf("%v\n", err)
+		// The error will be printed by the flags library so no need to
+		// print it again
 		os.Exit(1)
 	}
 }
@@ -57,6 +59,14 @@ func clientConfig() *spanclient.Configuration {
 	config := spanclient.NewConfiguration()
 	config.Debug = opt.Debug
 
+	// For debugging purposes. This *could* be an option on the command
+	// itself but nobody but one or two people in the world (including me)
+	// needs this feature once in a while so we'll just keep it as an
+	// environment variable.
+	apiAddr := os.Getenv("SPAN_HOST")
+	if apiAddr != "" {
+		config.BasePath = apiAddr
+	}
 	return config
 }
 
@@ -94,4 +104,26 @@ func truncateString(s string, n int) string {
 		return s[:n-3] + "..."
 	}
 	return s
+}
+
+// tagsToString converts a tag struct to a name:value list of strings. The name
+// tag (if it is set) is placed first since it makes it easier to read the list
+func tagsToString(tags map[string]string) string {
+	if tags == nil {
+		return ""
+	}
+	var ret []string
+	name, hasName := tags["name"]
+	if hasName {
+		ret = append(ret, fmt.Sprintf("name:%s", name))
+	}
+
+	for name, value := range tags {
+		if name == "name" {
+			continue
+		}
+		ret = append(ret, fmt.Sprintf("%s:%s", name, value))
+	}
+
+	return strings.Join(ret, "  ")
 }
