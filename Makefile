@@ -4,6 +4,11 @@ endif
 
 all: test span
 
+release: all
+	@cd cmd/span && GOOS=darwin go build -o ../../bin/macos/span && cd ../../bin/macos && tar czf ../span-macOS.tar.gz span
+	@cd cmd/span && GOOS=linux go build -o ../../bin/linux/span  && cd ../../bin/linux && tar czf ../span-linux.tar.gz span
+	@cd cmd/span && GOOS=windows go build -o ../../bin/windows/span.exe  && cd ../../bin/windows && zip ../span-windows.zip span.exe
+
 clean:
 	@find . -name "*-wal" -delete
 	@find . -name "*-shm" -delete
