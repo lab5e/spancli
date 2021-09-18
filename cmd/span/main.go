@@ -73,7 +73,7 @@ func clientConfig() *spanclient.Configuration {
 	return config
 }
 
-// spanContextWithTimeout creates a context.Context with timeout and
+// spanContext creates a context.Context with timeout and
 // credentials
 func spanContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.WithValue(context.Background(),

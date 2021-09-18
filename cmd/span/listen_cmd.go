@@ -57,6 +57,7 @@ func (r *listenCmd) Execute([]string) error {
 // collection.
 func (r *listenCmd) openDataStream() (spanclient.DataStream, error) {
 	ctx, _ := spanContext()
+
 	if r.DeviceID != "" {
 		return spanclient.NewDeviceDataStream(ctx, clientConfig(), r.CollectionID, r.DeviceID)
 	}

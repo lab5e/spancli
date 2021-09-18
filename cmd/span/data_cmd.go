@@ -50,7 +50,8 @@ func (r *dataCmd) listDeviceData() error {
 	}
 
 	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, cancel := spanContext()
+	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
@@ -76,7 +77,8 @@ func (r *dataCmd) listCollectionData() error {
 	}
 
 	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, cancel := spanContext()
+	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 

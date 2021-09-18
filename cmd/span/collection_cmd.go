@@ -48,7 +48,8 @@ func (r *addCollection) Execute([]string) error {
 		return err
 	}
 	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, cancel := spanContext()
+	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
@@ -74,7 +75,8 @@ func (r *addCollection) Execute([]string) error {
 
 func (r *getCollection) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, cancel := spanContext()
+	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
@@ -92,7 +94,8 @@ func (r *getCollection) Execute([]string) error {
 
 func (r *listCollection) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, cancel := spanContext()
+	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
@@ -123,7 +126,8 @@ func (r *deleteCollection) Execute([]string) error {
 	}
 
 	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, cancel := spanContext()
+	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 

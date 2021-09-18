@@ -58,7 +58,8 @@ func (r *addDevice) Execute([]string) error {
 		return err
 	}
 	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, cancel := spanContext()
+	defer cancel()
 
 	device, _, err := client.DevicesApi.CreateDevice(ctx, r.CollectionID, spanclient.Device{
 		CollectionId: r.CollectionID,
@@ -76,7 +77,8 @@ func (r *addDevice) Execute([]string) error {
 
 func (r *getDevice) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, cancel := spanContext()
+	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
@@ -94,7 +96,8 @@ func (r *getDevice) Execute([]string) error {
 
 func (r *listDevice) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, cancel := spanContext()
+	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
@@ -123,7 +126,8 @@ func (r *listDevice) Execute([]string) error {
 
 func (r *sendDevice) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, cancel := spanContext()
+	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
@@ -151,7 +155,8 @@ func (r *deleteDevice) Execute([]string) error {
 	}
 
 	client := spanclient.NewAPIClient(clientConfig())
-	ctx, _ := spanContext()
+	ctx, cancel := spanContext()
+	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
