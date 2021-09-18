@@ -7,6 +7,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/lab5e/spancli/pkg/helpers"
 	"github.com/lab5e/spanclient-go/v4"
 )
 
@@ -80,6 +81,8 @@ func (a *addOutput) Execute([]string) error {
 	ctx, cancel := spanContext()
 	defer cancel()
 
+	helpers.CheckVersion(ctx, client)
+
 	output, resp, err := client.OutputsApi.CreateOutput(ctx, a.CollectionID, spanclient.Output{
 		Type:    spanclient.OutputType(a.Type),
 		Enabled: true,
@@ -130,6 +133,8 @@ func (l *listOutputs) Execute([]string) error {
 	ctx, cancel := spanContext()
 	defer cancel()
 
+	helpers.CheckVersion(ctx, client)
+
 	outputs, _, err := client.OutputsApi.ListOutputs(ctx, l.CollectionID)
 	if err != nil {
 		return err
@@ -154,6 +159,8 @@ func (e *statusOutput) Execute([]string) error {
 	ctx, cancel := spanContext()
 	defer cancel()
 
+	helpers.CheckVersion(ctx, client)
+
 	status, _, err := client.OutputsApi.Status(ctx, e.CollectionID, e.OutputID)
 	if err != nil {
 		return err
@@ -170,6 +177,8 @@ func (l *logsOutput) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
+
+	helpers.CheckVersion(ctx, client)
 
 	logs, _, err := client.OutputsApi.Logs(ctx, l.CollectionID, l.OutputID)
 	if err != nil {

@@ -12,6 +12,7 @@ import (
 	"unicode"
 
 	"github.com/antihax/optional"
+	"github.com/lab5e/spancli/pkg/helpers"
 	"github.com/lab5e/spanclient-go/v4"
 )
 
@@ -28,6 +29,7 @@ type dataCmd struct {
 }
 
 func (r *dataCmd) Execute([]string) error {
+
 	if r.DeviceID == "" {
 		return r.listCollectionData()
 	}
@@ -49,6 +51,9 @@ func (r *dataCmd) listDeviceData() error {
 
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
+
+	helpers.CheckVersion(ctx, client)
+
 	data, _, err := client.DevicesApi.ListDeviceData(ctx, r.CollectionID, r.DeviceID, opts)
 	if err != nil {
 		return err
@@ -72,6 +77,9 @@ func (r *dataCmd) listCollectionData() error {
 
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
+
+	helpers.CheckVersion(ctx, client)
+
 	data, _, err := client.CollectionsApi.ListCollectionData(ctx, r.CollectionID, opts)
 	if err != nil {
 		return err

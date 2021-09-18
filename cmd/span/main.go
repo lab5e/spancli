@@ -24,6 +24,7 @@ type options struct {
 	Data       dataCmd       `command:"data" description:"data listing commands"`
 	Listen     listenCmd     `command:"listen" description:"live streaming of data"`
 	Output     outputCmd     `command:"output" alias:"out" description:"output management"`
+	Version    versionCmd    `command:"version" alias:"v" description:"Check server version"`
 }
 
 var opt options

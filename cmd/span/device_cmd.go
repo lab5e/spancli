@@ -8,6 +8,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/lab5e/spancli/pkg/helpers"
 	"github.com/lab5e/spanclient-go/v4"
 )
 
@@ -76,6 +77,9 @@ func (r *addDevice) Execute([]string) error {
 func (r *getDevice) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
+
+	helpers.CheckVersion(ctx, client)
+
 	device, _, err := client.DevicesApi.RetrieveDevice(ctx, r.CollectionID, r.DeviceID)
 	if err != nil {
 		return err
@@ -91,6 +95,8 @@ func (r *getDevice) Execute([]string) error {
 func (r *listDevice) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
+
+	helpers.CheckVersion(ctx, client)
 
 	devices, _, err := client.DevicesApi.ListDevices(ctx, r.CollectionID)
 	if err != nil {
@@ -119,6 +125,8 @@ func (r *sendDevice) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
 
+	helpers.CheckVersion(ctx, client)
+
 	payload := r.Text
 	if !r.IsBase64 {
 		payload = base64.StdEncoding.EncodeToString([]byte(r.Text))
@@ -144,6 +152,8 @@ func (r *deleteDevice) Execute([]string) error {
 
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
+
+	helpers.CheckVersion(ctx, client)
 
 	_, _, err := client.DevicesApi.DeleteDevice(ctx, r.CollectionID, r.DeviceID)
 	if err != nil {

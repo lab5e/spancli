@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/lab5e/spancli/pkg/helpers"
 	"github.com/lab5e/spanclient-go/v4"
 )
 
@@ -48,6 +49,9 @@ func (r *addCollection) Execute([]string) error {
 	}
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
+
+	helpers.CheckVersion(ctx, client)
+
 	collection, _, err := client.CollectionsApi.CreateCollection(ctx, spanclient.Collection{
 		TeamId: r.TeamID,
 		FieldMask: spanclient.FieldMask{
@@ -71,6 +75,9 @@ func (r *addCollection) Execute([]string) error {
 func (r *getCollection) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
+
+	helpers.CheckVersion(ctx, client)
+
 	collection, _, err := client.CollectionsApi.RetrieveCollection(ctx, r.CollectionID)
 	if err != nil {
 		return err
@@ -86,6 +93,8 @@ func (r *getCollection) Execute([]string) error {
 func (r *listCollection) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
+
+	helpers.CheckVersion(ctx, client)
 
 	collections, _, err := client.CollectionsApi.ListCollections(ctx)
 	if err != nil {
@@ -116,6 +125,8 @@ func (r *deleteCollection) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, _ := spanContext()
 
+	helpers.CheckVersion(ctx, client)
+
 	_, _, err := client.CollectionsApi.DeleteCollection(ctx, r.CollectionID)
 	if err != nil {
 		return err
@@ -129,6 +140,8 @@ func (u *updateCollection) Execute([]string) error {
 	client := spanclient.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
+
+	helpers.CheckVersion(ctx, client)
 
 	collection, resp, err := client.CollectionsApi.RetrieveCollection(ctx, u.CollectionID)
 	if err != nil {
