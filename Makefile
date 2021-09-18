@@ -2,7 +2,7 @@ ifeq ($(GOPATH),)
 GOPATH := $(HOME)/go
 endif
 
-all: test lint vet span
+all: test span
 
 clean:
 	@find . -name "*-wal" -delete
@@ -11,17 +11,6 @@ clean:
 
 span:
 	@cd cmd/span && go build -o ../../bin/span
-
-check: lint vet staticcheck revive
-
-lint:
-	@revive -exclude ./... 
-
-vet:
-	@go vet ./...
-
-staticcheck:
-	@staticcheck ./...
 
 test:
 	@go test ./...
