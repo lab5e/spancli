@@ -81,7 +81,7 @@ func (r *getCollection) Execute([]string) error {
 		return err
 	}
 
-	fmt.Printf("%s\n", string(jsonData))
+	fmt.Println(string(jsonData))
 	return nil
 }
 

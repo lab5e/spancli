@@ -10,6 +10,7 @@ import (
 
 type teamCmd struct {
 	Add    addTeam    `command:"add" description:"create new team"`
+	Get    getTeam    `command:"get" description:"get team details"`
 	List   listTeams  `command:"list" alias:"ls" description:"list teams"`
 	Delete deleteTeam `command:"delete" alias:"del" description:"delete team"`
 
@@ -18,6 +19,10 @@ type teamCmd struct {
 
 type addTeam struct {
 	Name string `long:"name" description:"team name"`
+}
+
+type getTeam struct {
+	TeamID string `long:"team-id" description:"id of team" required:"yes"`
 }
 
 type listTeams struct {
@@ -49,6 +54,24 @@ func (r *addTeam) Execute([]string) error {
 	}
 
 	fmt.Printf("created team %s\n", *team.TeamId)
+	return nil
+}
+
+func (r *getTeam) Execute([]string) error {
+	client, ctx, cancel := newUserAPIClient()
+	defer cancel()
+
+	team, res, err := client.TeamsApi.RetrieveTeam(ctx, r.TeamID).Execute()
+	if err != nil {
+		return apiError(res, err)
+	}
+
+	jsonData, err := json.MarshalIndent(team, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(jsonData))
 	return nil
 }
 
