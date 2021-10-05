@@ -26,6 +26,7 @@ type options struct {
 	Debug   bool          `long:"debug" description:"turn on debug output"`
 
 	Team       teamCmd       `command:"team" description:"team management"`
+	Invite     inviteCmd     `command:"invite" description:"manage team invitations"`
 	Collection collectionCmd `command:"collection" alias:"col" description:"collection management"`
 	Device     deviceCmd     `command:"device" alias:"dev" description:"device management"`
 	Data       dataCmd       `command:"data" description:"data listing commands"`

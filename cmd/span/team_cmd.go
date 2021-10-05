@@ -14,7 +14,6 @@ type teamCmd struct {
 	List   listTeams  `command:"list" alias:"ls" description:"list teams"`
 	Delete deleteTeam `command:"delete" alias:"del" description:"delete team"`
 
-	Invite  inviteCmd `command:"invite" description:"manage team invitations"`
 	Members memberCmd `command:"member" description:"manage team members"`
 }
 
