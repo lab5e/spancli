@@ -63,7 +63,7 @@ func (r *addCollection) Execute([]string) error {
 		return apiError(res, err)
 	}
 
-	fmt.Printf("created collection '%s'\n", *col.CollectionId)
+	fmt.Printf("created collection %s\n", *col.CollectionId)
 	return nil
 }
 
@@ -100,7 +100,7 @@ func (r *deleteCollection) Execute([]string) error {
 		return apiError(res, err)
 	}
 
-	fmt.Printf("deleted collection '%s'", *col.CollectionId)
+	fmt.Printf("deleted collection %s", *col.CollectionId)
 	return nil
 }
 

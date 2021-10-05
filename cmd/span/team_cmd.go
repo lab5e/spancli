@@ -12,6 +12,8 @@ type teamCmd struct {
 	Add    addTeam    `command:"add" description:"create new team"`
 	List   listTeams  `command:"list" alias:"ls" description:"list teams"`
 	Delete deleteTeam `command:"delete" alias:"del" description:"delete team"`
+
+	Invite inviteCmd `command:"invite" description:"create invitation to team"`
 }
 
 type addTeam struct {
@@ -46,7 +48,7 @@ func (r *addTeam) Execute([]string) error {
 		return apiError(res, err)
 	}
 
-	fmt.Printf("created team '%s'\n", *team.TeamId)
+	fmt.Printf("created team %s\n", *team.TeamId)
 	return nil
 }
 
@@ -95,7 +97,7 @@ func (r *deleteTeam) Execute([]string) error {
 		return apiError(res, err)
 	}
 
-	fmt.Printf("deleted team '%s'\n", *team.TeamId)
+	fmt.Printf("deleted team %s\n", *team.TeamId)
 
 	return nil
 }

@@ -77,7 +77,7 @@ func (r *dataCmd) listCollectionData(client *spanapi.APIClient, ctx context.Cont
 
 		for _, data := range *items.Data {
 			// bail out if we have reached the end of the interval
-			ms, _ := receivedToTime(*data.Received)
+			ms, _ := msSinceEpochToTime(*data.Received)
 			if ms < start {
 				fmt.Printf("End of interval, %d rows returned\n", rowCount)
 				return nil
@@ -139,7 +139,7 @@ func (r *dataCmd) listDeviceData(client *spanapi.APIClient, ctx context.Context)
 
 		for _, data := range *items.Data {
 			// bail out if we have reached the end of the interval
-			ms, _ := receivedToTime(*data.Received)
+			ms, _ := msSinceEpochToTime(*data.Received)
 			if ms < start {
 				fmt.Printf("End of interval, %d rows returned\n", rowCount)
 				return nil
@@ -156,7 +156,7 @@ func (r *dataCmd) listDeviceData(client *spanapi.APIClient, ctx context.Context)
 	}
 }
 
-func receivedToTime(ts string) (int64, time.Time) {
+func msSinceEpochToTime(ts string) (int64, time.Time) {
 	r, err := strconv.ParseInt(ts, 10, 63)
 	if err != nil {
 		return time.Now().UnixNano() / int64(time.Millisecond), time.Now()
