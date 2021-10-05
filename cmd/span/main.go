@@ -15,6 +15,8 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/lab5e/go-spanapi/v4"
 	"github.com/lab5e/go-spanapi/v4/apitools"
+	"github.com/lab5e/go-userapi"
+	userapitools "github.com/lab5e/go-userapi/apitools"
 	"github.com/lab5e/spanclient-go/v4"
 )
 
@@ -23,6 +25,7 @@ type options struct {
 	Timeout time.Duration `long:"timeout" default:"15s" description:"timeout for operation"`
 	Debug   bool          `long:"debug" description:"turn on debug output"`
 
+	Team       teamCmd       `command:"team" description:"team management"`
 	Collection collectionCmd `command:"collection" alias:"col" description:"collection management"`
 	Device     deviceCmd     `command:"device" alias:"dev" description:"device management"`
 	Data       dataCmd       `command:"data" description:"data listing commands"`
@@ -89,15 +92,25 @@ func apiError(res *http.Response, e error) error {
 	return fmt.Errorf("%s: %s", res.Status, errmsg.Message)
 }
 
-// newClient creates a new client based on the command line options and/or
+// newSpanAPIClient creates a new SpanAPI client based on the command line options and/or
 // defaults.
-func newClient() (*spanapi.APIClient, context.Context, context.CancelFunc) {
+func newSpanAPIClient() (*spanapi.APIClient, context.Context, context.CancelFunc) {
 	config := spanapi.NewConfiguration()
 	config.Debug = opt.Debug
 
 	ctx, done := apitools.ContextWithAuthAndTimeout(opt.Token, opt.Timeout)
 
 	return spanapi.NewAPIClient(config), ctx, done
+}
+
+// newUserAPIClient creates a new UserAPI client based on the command line options
+// and/or defaults.
+func newUserAPIClient() (*userapi.APIClient, context.Context, context.CancelFunc) {
+	config := userapi.NewConfiguration()
+	config.Debug = opt.Debug
+
+	ctx, done := userapitools.NewAuthenticatedContext(opt.Token, opt.Timeout)
+	return userapi.NewAPIClient(config), ctx, done
 }
 
 // Create spanclient.Configuration based on the command line options.

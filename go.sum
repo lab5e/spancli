@@ -122,6 +122,8 @@ github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
 github.com/lab5e/go-spanapi/v4 v4.1.16 h1:oM8h/h27T+9qpaHBIY44VbVmUtL+b68C6mP56U+FqKA=
 github.com/lab5e/go-spanapi/v4 v4.1.16/go.mod h1:zjT8srtIV3oJwAUSJTW5GC0198i3daXkBrpOE+rjlFo=
+github.com/lab5e/go-userapi v1.3.11 h1:bsMGobMTamhIiLAR75tdta8pcAp2gR1pkKVh31pHEBE=
+github.com/lab5e/go-userapi v1.3.11/go.mod h1:gdKZm9cBZVfvxxujalrupZm7J3i582tlOqRI0O/oYYc=
 github.com/lab5e/spanclient-go/v4 v4.0.10 h1:NYFtGLD5pN384B1X5Cb2htmPseGgtMciCjgruoNaFkE=
 github.com/lab5e/spanclient-go/v4 v4.0.10/go.mod h1:+mmOOp62wFP9PMLYy13aryPaner4aX8RxZiC5oHBOsI=
 github.com/mattn/go-runewidth v0.0.9 h1:Lm995f3rfxdpd6TSmuVCHVb/QhupuXlYr8sCI/QdE+0=
@@ -214,6 +216,7 @@ golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4Iltr
 golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
+golang.org/x/oauth2 v0.0.0-20210218202405-ba52d332ba99/go.mod h1:KelEdhl1UZF7XfJ4dDtk6s++YSgaE7mD/BuKKDLBl4A=
 golang.org/x/oauth2 v0.0.0-20210427180440-81ed05c6b58c h1:SgVl/sCtkicsS7psKkje4H9YtjdEl3xsYh7N+5TDHqY=
 golang.org/x/oauth2 v0.0.0-20210427180440-81ed05c6b58c/go.mod h1:KelEdhl1UZF7XfJ4dDtk6s++YSgaE7mD/BuKKDLBl4A=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=

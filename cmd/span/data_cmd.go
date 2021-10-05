@@ -23,7 +23,7 @@ type dataCmd struct {
 }
 
 func (r *dataCmd) Execute([]string) error {
-	client, ctx, cancel := newClient()
+	client, ctx, cancel := newSpanAPIClient()
 	defer cancel()
 
 	if r.DeviceID == "" {
