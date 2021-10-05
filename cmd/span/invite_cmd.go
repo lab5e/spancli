@@ -78,8 +78,8 @@ func (r *listInvite) Execute([]string) error {
 	t.SetTitle("Invites for team " + r.TeamID)
 	t.AppendHeader(table.Row{"Code", "Created"})
 	for _, invite := range *invites.Invites {
-		_, createdAt := msSinceEpochToTime(*invite.CreatedAt)
-		t.AppendRow([]interface{}{*invite.Code, createdAt})
+		createdAt := localTimeFormat(*invite.CreatedAt)
+		t.AppendRow(table.Row{*invite.Code, createdAt})
 	}
 	renderTable(t, r.Format)
 

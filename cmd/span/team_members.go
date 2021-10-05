@@ -45,10 +45,10 @@ func (r *listMembers) Execute([]string) error {
 
 	t := newTableOutput(r.Format, r.NoColor, r.PageSize)
 	t.SetTitle("Members of " + r.TeamID)
-	t.AppendHeader(table.Row{"Role", "UserID", "Email"})
+	t.AppendHeader(table.Row{"UserID", "Role", "Email"})
 
 	for _, member := range *team.Members {
-		t.AppendRow([]interface{}{*member.Role, *member.UserId, *member.User.Email})
+		t.AppendRow(table.Row{*member.UserId, *member.Role, *member.User.Email})
 	}
 	renderTable(t, r.Format)
 	return nil

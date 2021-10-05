@@ -108,9 +108,9 @@ func (r *listCollection) Execute([]string) error {
 	client, ctx, cancel := newSpanAPIClient()
 	defer cancel()
 
-	collections, _, err := client.CollectionsApi.ListCollections(ctx).Execute()
+	collections, res, err := client.CollectionsApi.ListCollections(ctx).Execute()
 	if err != nil {
-		return err
+		return apiError(res, err)
 	}
 
 	if r.Format == "json" {
@@ -126,7 +126,17 @@ func (r *listCollection) Execute([]string) error {
 	t.SetTitle("Collections")
 	t.AppendHeader(table.Row{"ID", "Name", "TeamID"})
 	for _, col := range *collections.Collections {
-		t.AppendRow([]interface{}{*col.CollectionId, col.GetTags()["name"], *col.TeamId})
+		// only truncate name if we output as 'text'
+		name := col.GetTags()["name"]
+		if r.Format == "text" {
+			name = truncateString(name, 25)
+		}
+
+		t.AppendRow(table.Row{
+			*col.CollectionId,
+			name,
+			*col.TeamId,
+		})
 	}
 	renderTable(t, r.Format)
 	return nil

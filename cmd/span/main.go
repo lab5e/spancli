@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -35,6 +36,8 @@ type options struct {
 
 var opt options
 var parser = flags.NewParser(&opt, flags.Default)
+
+const timeFmt = "2006-01-02 15:04:05"
 
 func main() {
 	if _, err := parser.Parse(); err != nil {
@@ -162,4 +165,17 @@ func truncateString(s string, n int) string {
 		return s[:n-3] + "..."
 	}
 	return s
+}
+
+func msSinceEpochToTime(ts string) (int64, time.Time) {
+	r, err := strconv.ParseInt(ts, 10, 63)
+	if err != nil {
+		return time.Now().UnixNano() / int64(time.Millisecond), time.Now()
+	}
+	return r, time.Unix(0, r*int64(time.Millisecond))
+}
+
+func localTimeFormat(ts string) string {
+	_, t := msSinceEpochToTime(ts)
+	return t.Local().Format(timeFmt)
 }

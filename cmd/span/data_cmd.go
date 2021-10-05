@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/lab5e/go-spanapi/v4"
@@ -154,12 +153,4 @@ func (r *dataCmd) listDeviceData(client *spanapi.APIClient, ctx context.Context)
 			}
 		}
 	}
-}
-
-func msSinceEpochToTime(ts string) (int64, time.Time) {
-	r, err := strconv.ParseInt(ts, 10, 63)
-	if err != nil {
-		return time.Now().UnixNano() / int64(time.Millisecond), time.Now()
-	}
-	return r, time.Unix(0, r*int64(time.Millisecond))
 }

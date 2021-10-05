@@ -98,7 +98,17 @@ func (r *listTeams) Execute([]string) error {
 	t.AppendHeader(table.Row{"ID", "Name"})
 
 	for _, team := range *teamList.Teams {
-		t.AppendRow([]interface{}{*team.TeamId, team.GetTags()["name"]})
+		// only truncate name if we output as 'text'
+		name := team.GetTags()["name"]
+		if r.Format == "text" {
+			name = truncateString(name, 25)
+		}
+
+		if team.GetIsPrivate() {
+			name += " [P]"
+		}
+
+		t.AppendRow(table.Row{*team.TeamId, name})
 	}
 	renderTable(t, r.Format)
 
