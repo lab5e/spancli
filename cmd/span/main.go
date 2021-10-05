@@ -6,12 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/lab5e/spanclient-go/v4"
+	"github.com/lab5e/go-spanapi/v4"
+	"github.com/lab5e/go-spanapi/v4/apitools"
 )
 
 type options struct {
@@ -57,9 +59,9 @@ func main() {
 	}
 }
 
-// Create spanclient.Configuration based on the command line options.
-func clientConfig() *spanclient.Configuration {
-	config := spanclient.NewConfiguration()
+// Create spanapi.Configuration based on the command line options.
+func clientConfig() *spanapi.Configuration {
+	config := spanapi.NewConfiguration()
 	config.Debug = opt.Debug
 
 	// For debugging purposes. This *could* be an option on the command
@@ -68,7 +70,12 @@ func clientConfig() *spanclient.Configuration {
 	// environment variable.
 	apiAddr := os.Getenv("SPAN_HOST")
 	if apiAddr != "" {
-		config.BasePath = apiAddr
+		u, err := url.Parse(apiAddr)
+		if err != nil {
+			panic(fmt.Sprintf("Don't know how to parse url %s: %v", apiAddr, err))
+		}
+		config.Host = u.Host
+		config.Scheme = u.Scheme
 	}
 	return config
 }
@@ -76,13 +83,7 @@ func clientConfig() *spanclient.Configuration {
 // spanContext creates a context.Context with timeout and
 // credentials
 func spanContext() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.WithValue(context.Background(),
-		spanclient.ContextAPIKey,
-		spanclient.APIKey{
-			Key:    opt.Token,
-			Prefix: "",
-		}),
-		time.Duration(opt.Timeout)*time.Second)
+	return apitools.ContextWithAuthAndTimeout(opt.Token, time.Second*60)
 }
 
 // verifyDeleteIntent requires the user to type in "yes " followed by
@@ -134,4 +135,13 @@ func tagsToMap(param []string) (map[string]string, error) {
 		tags[strings.TrimSpace(nameValue[0])] = strings.TrimSpace(nameValue[1])
 	}
 	return tags, nil
+}
+
+// Quick conversion from string pointer -> string. Returns blank when pointer
+// is nil
+func strPtr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }

@@ -9,8 +9,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/lab5e/go-spanapi/v4"
 	"github.com/lab5e/spancli/pkg/helpers"
-	"github.com/lab5e/spanclient-go/v4"
 )
 
 type collectionCmd struct {
@@ -47,40 +47,34 @@ func (r *addCollection) Execute([]string) error {
 	if err != nil {
 		return err
 	}
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
-	collection, _, err := client.CollectionsApi.CreateCollection(ctx, spanclient.Collection{
-		TeamId: r.TeamID,
-		FieldMask: spanclient.FieldMask{
-			Imsi:     false,
-			Imei:     false,
-			Location: false,
+	collection, _, err := client.CollectionsApi.CreateCollectionExecute(spanapi.ApiCreateCollectionRequest{}.Body(
+		spanapi.Collection{
+			TeamId: &r.TeamID,
+			Tags:   &tags,
 		},
-		Firmware: spanclient.CollectionFirmware{
-			Management: spanclient.DISABLED,
-		},
-		Tags: tags,
-	})
+	))
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("created collection with id '%s'\n", collection.CollectionId)
+	fmt.Printf("created collection with id '%s'\n", *collection.CollectionId)
 	return nil
 }
 
 func (r *getCollection) Execute([]string) error {
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
-	collection, _, err := client.CollectionsApi.RetrieveCollection(ctx, r.CollectionID)
+	collection, _, err := client.CollectionsApi.RetrieveCollection(ctx, r.CollectionID).Execute()
 	if err != nil {
 		return err
 	}
@@ -93,13 +87,13 @@ func (r *getCollection) Execute([]string) error {
 }
 
 func (r *listCollection) Execute([]string) error {
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
-	collections, _, err := client.CollectionsApi.ListCollections(ctx)
+	collections, _, err := client.CollectionsApi.ListCollections(ctx).Execute()
 	if err != nil {
 		return err
 	}
@@ -107,12 +101,12 @@ func (r *listCollection) Execute([]string) error {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 5, ' ', 0)
 	fmt.Fprintf(w, strings.Join([]string{"CollectionID", "TeamID", "FW Mgmt", "Tags"}, "\t")+"\n")
 
-	for _, col := range collections.Collections {
+	for _, col := range *collections.Collections {
 		fmt.Fprintf(w, strings.Join([]string{
-			col.CollectionId,
-			col.TeamId,
-			string(col.Firmware.Management),
-			tagsToString(col.Tags),
+			strPtr(col.CollectionId),
+			strPtr(col.TeamId),
+			strPtr((*string)(col.Firmware.Management)),
+			tagsToString(*col.Tags),
 		}, "\t")+"\n")
 	}
 	return w.Flush()
@@ -125,13 +119,13 @@ func (r *deleteCollection) Execute([]string) error {
 		}
 	}
 
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
-	_, _, err := client.CollectionsApi.DeleteCollection(ctx, r.CollectionID)
+	_, _, err := client.CollectionsApi.DeleteCollection(ctx, r.CollectionID).Execute()
 	if err != nil {
 		return err
 	}
@@ -141,13 +135,13 @@ func (r *deleteCollection) Execute([]string) error {
 }
 
 func (u *updateCollection) Execute([]string) error {
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
-	collection, resp, err := client.CollectionsApi.RetrieveCollection(ctx, u.CollectionID)
+	collection, resp, err := client.CollectionsApi.RetrieveCollection(ctx, u.CollectionID).Execute()
 	if err != nil {
 		if resp.StatusCode == http.StatusNotFound {
 			return errors.New("unknown collection")
@@ -155,16 +149,18 @@ func (u *updateCollection) Execute([]string) error {
 		return err
 	}
 	if collection.Tags == nil {
-		collection.Tags = make(map[string]string)
+		tags := make(map[string]string)
+		collection.Tags = &tags
 	}
+	t := *collection.Tags
 	for _, val := range u.Tags {
 		nameValue := strings.Split(val, ":")
 		if len(nameValue) != 2 {
 			return errors.New("tag name incorrectly formatted (needs name:value)")
 		}
-		collection.Tags[nameValue[0]] = nameValue[1]
+		t[nameValue[0]] = nameValue[1]
 	}
-	_, _, err = client.CollectionsApi.UpdateCollection(ctx, u.CollectionID, collection)
+	_, _, err = client.CollectionsApi.UpdateCollection(ctx, u.CollectionID).Body(collection).Execute()
 	if err != nil {
 		return err
 	}

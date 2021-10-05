@@ -11,9 +11,8 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/antihax/optional"
+	"github.com/lab5e/go-spanapi/v4"
 	"github.com/lab5e/spancli/pkg/helpers"
-	"github.com/lab5e/spanclient-go/v4"
 )
 
 type dataCmd struct {
@@ -37,25 +36,21 @@ func (r *dataCmd) Execute([]string) error {
 }
 
 func (r *dataCmd) listDeviceData() error {
-	opts := &spanclient.ListDeviceDataOpts{
-		Limit: optional.NewInt32(r.Limit),
-	}
-
-	if r.Start != "" {
-		opts.End = optional.NewString(r.End)
-	}
-
-	if r.End != "" {
-		opts.End = optional.NewString(r.Start)
-	}
-
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
-	data, _, err := client.DevicesApi.ListDeviceData(ctx, r.CollectionID, r.DeviceID, opts)
+	req := client.DevicesApi.ListDeviceData(ctx, r.CollectionID, r.DeviceID)
+	if r.Start != "" {
+		req.Start(r.Start)
+	}
+	if r.End != "" {
+		req.End(r.End)
+	}
+	req.Limit(r.Limit)
+	data, _, err := req.Execute()
 	if err != nil {
 		return err
 	}
@@ -64,25 +59,20 @@ func (r *dataCmd) listDeviceData() error {
 }
 
 func (r *dataCmd) listCollectionData() error {
-	opts := &spanclient.ListCollectionDataOpts{
-		Limit: optional.NewInt32(r.Limit),
-	}
-
-	if r.Start != "" {
-		opts.End = optional.NewString(r.End)
-	}
-
-	if r.End != "" {
-		opts.End = optional.NewString(r.Start)
-	}
-
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
-
-	data, _, err := client.CollectionsApi.ListCollectionData(ctx, r.CollectionID, opts)
+	req := client.DevicesApi.ListDeviceData(ctx, r.CollectionID, r.DeviceID)
+	if r.Start != "" {
+		req.Start(r.Start)
+	}
+	if r.End != "" {
+		req.End(r.End)
+	}
+	req.Limit(r.Limit)
+	data, _, err := req.Execute()
 	if err != nil {
 		return err
 	}
@@ -90,7 +80,7 @@ func (r *dataCmd) listCollectionData() error {
 	return r.listData(&data)
 }
 
-func (r *dataCmd) listData(data *spanclient.ListDataResponse) error {
+func (r *dataCmd) listData(data *spanapi.ListDataResponse) error {
 	if r.JSONOutput {
 		fmt.Print("[")
 
@@ -98,7 +88,7 @@ func (r *dataCmd) listData(data *spanclient.ListDataResponse) error {
 			fmt.Print("\n")
 		}
 
-		for n, d := range data.Data {
+		for n, d := range *data.Data {
 
 			var jsonData []byte
 			var err error
@@ -118,7 +108,7 @@ func (r *dataCmd) listData(data *spanclient.ListDataResponse) error {
 
 			fmt.Print(string(jsonData))
 
-			if n < len(data.Data)-1 {
+			if n < len(*data.Data)-1 {
 				fmt.Print(",")
 			}
 			if r.JSONPretty {
@@ -133,17 +123,17 @@ func (r *dataCmd) listData(data *spanclient.ListDataResponse) error {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
 	fmt.Fprintf(w, strings.Join([]string{"DeviceID", "Name", "Trans", "Received", "Payload"}, "\t")+"\n")
 
-	for _, d := range data.Data {
+	for _, d := range *data.Data {
 
 		if r.ISODate {
-			received, err := strconv.ParseInt(d.Received, 10, 64)
+			received, err := strconv.ParseInt(*d.Received, 10, 64)
 			if err == nil {
-				d.Received = time.Unix(0, received*int64(time.Millisecond)).Format(time.RFC3339)
+				*d.Received = time.Unix(0, received*int64(time.Millisecond)).Format(time.RFC3339)
 			}
 		}
 
 		if r.Decode {
-			data, err := base64.StdEncoding.DecodeString(d.Payload)
+			data, err := base64.StdEncoding.DecodeString(*d.Payload)
 			if err == nil {
 
 				clean := strings.Map(func(r rune) rune {
@@ -153,16 +143,16 @@ func (r *dataCmd) listData(data *spanclient.ListDataResponse) error {
 					return -1
 				}, string(data))
 
-				d.Payload = "'" + clean + "'"
+				*d.Payload = "'" + clean + "'"
 			}
 		}
-
+		t := *d.Device.Tags
 		fmt.Fprintf(w, strings.Join([]string{
-			d.Device.DeviceId,
-			d.Device.Tags["name"],
-			d.Transport,
-			d.Received,
-			d.Payload,
+			strPtr(d.Device.DeviceId),
+			t["name"],
+			strPtr(d.Transport),
+			strPtr(d.Received),
+			strPtr(d.Payload),
 		}, "\t")+"\n")
 	}
 

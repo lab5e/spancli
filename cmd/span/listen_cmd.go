@@ -8,7 +8,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/lab5e/spanclient-go/v4"
+//	"github.com/lab5e/go-spanapi/v4"
+	"github.com/lab5e/go-spanapi/v4/apitools"
 )
 
 type listenCmd struct {
@@ -34,7 +35,7 @@ func (r *listenCmd) Execute([]string) error {
 		}
 
 		if r.LogPayload {
-			r.logPayload(msg.Payload)
+			r.logPayload(*msg.Payload)
 		}
 
 		var jsonBytes []byte
@@ -55,13 +56,13 @@ func (r *listenCmd) Execute([]string) error {
 // openDataStream will open a DataStream from a device if DeviceID is
 // specified, otherwise it will return a DataStream from the
 // collection.
-func (r *listenCmd) openDataStream() (spanclient.DataStream, error) {
+func (r *listenCmd) openDataStream() (apitools.DataStream, error) {
 	ctx, _ := spanContext()
 
 	if r.DeviceID != "" {
-		return spanclient.NewDeviceDataStream(ctx, clientConfig(), r.CollectionID, r.DeviceID)
+		return apitools.NewDeviceDataStream(ctx, clientConfig(), r.CollectionID, r.DeviceID)
 	}
-	return spanclient.NewCollectionDataStream(ctx, clientConfig(), r.CollectionID)
+	return apitools.NewCollectionDataStream(ctx, clientConfig(), r.CollectionID)
 }
 
 func (r *listenCmd) logPayload(payload string) {

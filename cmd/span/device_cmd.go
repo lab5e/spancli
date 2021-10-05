@@ -8,8 +8,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/lab5e/go-spanapi/v4"
 	"github.com/lab5e/spancli/pkg/helpers"
-	"github.com/lab5e/spanclient-go/v4"
 )
 
 type deviceCmd struct {
@@ -40,7 +40,7 @@ type sendDevice struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
 	Port         int32  `long:"port" default:"1234" description:"destination port on device" required:"yes"`
-	Transport    string `long:"transport" choice:"udp-push" choice:"udp-pull"  choice:"coap-push" choice:"coap-pull" description:"transport" required:"yes"`
+	Transport    string `long:"transport" choice:"udp-push" choice:"udp-pull" choice:"coap-push" choice:"coap-pull" description:"transport" required:"yes"` //nolint (choice tags confusess linter)
 	CoapPath     string `long:"coap-path" description:"CoAP path"`
 	Text         string `long:"text" description:"text payload" required:"yes"`
 	IsBase64     bool   `long:"base64" description:"indicates that --text is base64 data"`
@@ -57,32 +57,33 @@ func (r *addDevice) Execute([]string) error {
 	if err != nil {
 		return err
 	}
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
-	device, _, err := client.DevicesApi.CreateDevice(ctx, r.CollectionID, spanclient.Device{
-		CollectionId: r.CollectionID,
-		Imsi:         r.IMSI,
-		Imei:         r.IMEI,
-		Tags:         tags,
-	})
+	device, _, err := client.DevicesApi.CreateDevice(ctx, r.CollectionID).Body(
+		spanapi.Device{
+			CollectionId: spanapi.PtrString(r.CollectionID),
+			Imsi:         spanapi.PtrString(r.IMSI),
+			Imei:         spanapi.PtrString(r.IMEI),
+			Tags:         &tags,
+		}).Execute()
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("created device with id '%s'\n", device.DeviceId)
+	fmt.Printf("created device with id '%s'\n", *device.DeviceId)
 	return nil
 }
 
 func (r *getDevice) Execute([]string) error {
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
-	device, _, err := client.DevicesApi.RetrieveDevice(ctx, r.CollectionID, r.DeviceID)
+	device, _, err := client.DevicesApi.RetrieveDevice(ctx, r.CollectionID, r.DeviceID).Execute()
 	if err != nil {
 		return err
 	}
@@ -95,37 +96,37 @@ func (r *getDevice) Execute([]string) error {
 }
 
 func (r *listDevice) Execute([]string) error {
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
-	devices, _, err := client.DevicesApi.ListDevices(ctx, r.CollectionID)
+	devices, _, err := client.DevicesApi.ListDevices(ctx, r.CollectionID).Execute()
 	if err != nil {
 		return err
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
 	fmt.Fprintf(w, strings.Join([]string{"DeviceID", "IMSI", "IMEI", "IP", "At", "Cell", "FW version", "State", "Tags"}, "\t")+"\n")
-	for _, dev := range devices.Devices {
+	for _, dev := range *devices.Devices {
 		fmt.Fprintf(w, strings.Join([]string{
-			dev.DeviceId,
-			dev.Imsi,
-			dev.Imei,
-			dev.Network.AllocatedIp,
-			dev.Network.AllocatedAt,
-			dev.Network.CellId,
-			dev.Firmware.FirmwareVersion,
-			dev.Firmware.State,
-			tagsToString(dev.Tags),
+			strPtr(dev.DeviceId),
+			strPtr(dev.Imsi),
+			strPtr(dev.Imei),
+			strPtr(dev.Network.AllocatedIp),
+			strPtr(dev.Network.AllocatedAt),
+			strPtr(dev.Network.CellId),
+			strPtr(dev.Firmware.FirmwareVersion),
+			strPtr(dev.Firmware.State),
+			tagsToString(*dev.Tags),
 		}, "\t")+"\n")
 	}
 	return w.Flush()
 }
 
 func (r *sendDevice) Execute([]string) error {
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
@@ -136,14 +137,15 @@ func (r *sendDevice) Execute([]string) error {
 		payload = base64.StdEncoding.EncodeToString([]byte(r.Text))
 	}
 
-	_, _, err := client.DevicesApi.SendMessage(ctx, r.CollectionID, r.DeviceID, spanclient.SendMessageRequest{
-		CollectionId: r.CollectionID,
-		DeviceId:     r.DeviceID,
-		Port:         r.Port,
-		Payload:      payload,
-		Transport:    r.Transport,
-		CoapPath:     r.CoapPath,
-	})
+	_, _, err := client.DevicesApi.SendMessage(ctx, r.CollectionID, r.DeviceID).Body(
+		spanapi.SendMessageRequest{
+			CollectionId: spanapi.PtrString(r.CollectionID),
+			DeviceId:     spanapi.PtrString(r.DeviceID),
+			Port:         spanapi.PtrInt32(r.Port),
+			Payload:      spanapi.PtrString(payload),
+			Transport:    spanapi.PtrString(r.Transport),
+			CoapPath:     spanapi.PtrString(r.CoapPath),
+		}).Execute()
 	return err
 }
 
@@ -154,13 +156,13 @@ func (r *deleteDevice) Execute([]string) error {
 		}
 	}
 
-	client := spanclient.NewAPIClient(clientConfig())
+	client := spanapi.NewAPIClient(clientConfig())
 	ctx, cancel := spanContext()
 	defer cancel()
 
 	helpers.CheckVersion(ctx, client)
 
-	_, _, err := client.DevicesApi.DeleteDevice(ctx, r.CollectionID, r.DeviceID)
+	_, _, err := client.DevicesApi.DeleteDevice(ctx, r.CollectionID, r.DeviceID).Execute()
 	if err != nil {
 		return err
 	}
