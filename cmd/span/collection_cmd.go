@@ -86,14 +86,14 @@ func (r *getCollection) Execute([]string) error {
 }
 
 func (r *deleteCollection) Execute([]string) error {
-	client, ctx, cancel := newSpanAPIClient()
-	defer cancel()
-
 	if !r.YesIAmSure {
 		if !verifyDeleteIntent() {
 			return fmt.Errorf("user aborted delete")
 		}
 	}
+
+	client, ctx, cancel := newSpanAPIClient()
+	defer cancel()
 
 	col, res, err := client.CollectionsApi.DeleteCollection(ctx, r.CollectionID).Execute()
 	if err != nil {

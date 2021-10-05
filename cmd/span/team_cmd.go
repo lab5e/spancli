@@ -14,7 +14,8 @@ type teamCmd struct {
 	List   listTeams  `command:"list" alias:"ls" description:"list teams"`
 	Delete deleteTeam `command:"delete" alias:"del" description:"delete team"`
 
-	Invite inviteCmd `command:"invite" description:"create invitation to team"`
+	Invite  inviteCmd `command:"invite" description:"manage team invitations"`
+	Members memberCmd `command:"member" description:"manage team members"`
 }
 
 type addTeam struct {
@@ -106,14 +107,14 @@ func (r *listTeams) Execute([]string) error {
 }
 
 func (r *deleteTeam) Execute([]string) error {
-	client, ctx, cancel := newUserAPIClient()
-	defer cancel()
-
 	if !r.YesIAmSure {
 		if !verifyDeleteIntent() {
 			return fmt.Errorf("user aborted delete")
 		}
 	}
+
+	client, ctx, cancel := newUserAPIClient()
+	defer cancel()
 
 	team, res, err := client.TeamsApi.DeleteTeam(ctx, r.TeamID).Execute()
 	if err != nil {

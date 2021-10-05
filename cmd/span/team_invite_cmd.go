@@ -12,6 +12,7 @@ type inviteCmd struct {
 	Add    addInvite    `command:"add" description:"add invite for team"`
 	List   listInvite   `command:"list" alias:"ls" description:"list invites for team"`
 	Delete deleteInvite `command:"delete" alias:"del" description:"delete invite from team"`
+	Accept acceptInvite `command:"accept" description:"accept invite"`
 }
 
 type addInvite struct {
@@ -29,6 +30,10 @@ type deleteInvite struct {
 	TeamID     string `long:"team-id" description:"id of team we wish to delete invite from" required:"yes"`
 	Code       string `long:"code" description:"invite code we wish to delete"`
 	YesIAmSure bool   `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
+}
+
+type acceptInvite struct {
+	Code string `long:"code" description:"invite code" required:"yes"`
 }
 
 func (r *addInvite) Execute([]string) error {
@@ -62,6 +67,13 @@ func (r *listInvite) Execute([]string) error {
 		return nil
 	}
 
+	// place it after the JSON output since outputting an empty JSON object
+	// is better than outputting a string.
+	if invites.Invites == nil {
+		fmt.Printf("no invites\n")
+		return nil
+	}
+
 	t := newTableOutput(r.Format, r.NoColor, r.PageSize)
 	t.SetTitle("Invites for team " + r.TeamID)
 	t.AppendHeader(table.Row{"Code", "Created"})
@@ -78,12 +90,32 @@ func (r *deleteInvite) Execute([]string) error {
 	client, ctx, cancel := newUserAPIClient()
 	defer cancel()
 
+	if !r.YesIAmSure {
+		if !verifyDeleteIntent() {
+			return fmt.Errorf("user aborted delete")
+		}
+	}
+
 	resp, res, err := client.TeamsApi.DeleteInvite(ctx, r.TeamID, r.Code).Execute()
 	if err != nil {
 		return apiError(res, err)
 	}
 
 	fmt.Printf("deleted invite %s from %s\n", *resp.Invite.Code, r.TeamID)
+
+	return nil
+}
+
+func (r *acceptInvite) Execute([]string) error {
+	client, ctx, cancel := newUserAPIClient()
+	defer cancel()
+
+	resp, res, err := client.TeamsApi.AcceptInvite(ctx).Body(userapi.AcceptInviteRequest{Code: &r.Code}).Execute()
+	if err != nil {
+		return apiError(res, err)
+	}
+
+	fmt.Printf("accepted invite to team %s", *resp.TeamId)
 
 	return nil
 }
