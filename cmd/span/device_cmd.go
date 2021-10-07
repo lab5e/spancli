@@ -21,7 +21,7 @@ type addDevice struct {
 	Name         string   `long:"name" description:"device name"`
 	IMSI         string   `long:"imsi" description:"IMSI of device SIM" required:"yes"`
 	IMEI         string   `long:"imei" description:"IMEI of device" required:"yes"`
-	Tags         []string `long:"tag" short:"t" description:"set tag value (name:value)"`
+	Tags         []string `long:"tag" description:"set tag value (name:value)"`
 }
 
 type getDevice struct {

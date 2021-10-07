@@ -71,7 +71,6 @@ func main() {
 				os.Exit(0)
 			}
 		}
-		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 }

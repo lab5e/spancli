@@ -115,7 +115,7 @@ func (r *deleteCollection) Execute([]string) error {
 		return apiError(res, err)
 	}
 
-	fmt.Printf("deleted collection %s", *col.CollectionId)
+	fmt.Printf("deleted collection %s\n", *col.CollectionId)
 	return nil
 }
 
@@ -126,6 +126,11 @@ func (r *listCollection) Execute([]string) error {
 	collections, res, err := client.CollectionsApi.ListCollections(ctx).Execute()
 	if err != nil {
 		return apiError(res, err)
+	}
+
+	if collections.Collections == nil {
+		fmt.Printf("no collections\n")
+		return nil
 	}
 
 	if r.Format == "json" {
