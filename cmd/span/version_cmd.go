@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/lab5e/go-spanapi/v4"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
@@ -12,8 +11,7 @@ type versionCmd struct {
 }
 
 func (v *versionCmd) Execute([]string) error {
-	client := spanapi.NewAPIClient(clientConfig())
-	ctx, cancel := spanContext()
+	client, ctx, cancel := newSpanAPIClient()
 	defer cancel()
 
 	info, _, err := client.SystemApi.GetSystemInfo(ctx).Execute()

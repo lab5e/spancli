@@ -1,30 +1,27 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"os"
-	"strings"
-	"text/tabwriter"
 
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/lab5e/go-spanapi/v4"
-	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type deviceCmd struct {
 	Add    addDevice    `command:"add" description:"create device"`
 	Get    getDevice    `command:"get" description:"get device"`
-	List   listDevice   `command:"list" alias:"ls" description:"list devices"`
+	List   listDevices  `command:"list" alias:"ls" description:"list devices"`
 	Send   sendDevice   `command:"send" description:"send downstream message"`
 	Delete deleteDevice `command:"delete" alias:"del" description:"delete device"`
 }
 
 type addDevice struct {
 	CollectionID string   `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	Name         string   `long:"name" description:"device name"`
 	IMSI         string   `long:"imsi" description:"IMSI of device SIM" required:"yes"`
 	IMEI         string   `long:"imei" description:"IMEI of device" required:"yes"`
-	Tags         []string `long:"tag" short:"t" description:"Set tag value (name:value)"`
+	Tags         []string `long:"tag" short:"t" description:"set tag value (name:value)"`
 }
 
 type getDevice struct {
@@ -32,8 +29,11 @@ type getDevice struct {
 	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
 }
 
-type listDevice struct {
+type listDevices struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	Format       string `long:"format" default:"text" description:"which output format to use" choice:"csv" choice:"html" choice:"markdown" choice:"text" choice:"json"`
+	NoColor      bool   `long:"no-color" env:"SPAN_NO_COLOR" description:"turn off coloring"`
+	PageSize     int    `long:"page-size" description:"if set, chop output into pages of page-size length"`
 }
 
 type sendDevice struct {
@@ -53,120 +53,83 @@ type deleteDevice struct {
 }
 
 func (r *addDevice) Execute([]string) error {
-	tags, err := tagsToMap(r.Tags)
-	if err != nil {
-		return err
-	}
-	client := spanapi.NewAPIClient(clientConfig())
-	ctx, cancel := spanContext()
+	client, ctx, cancel := newSpanAPIClient()
 	defer cancel()
 
-	device, _, err := client.DevicesApi.CreateDevice(ctx, r.CollectionID).Body(
-		spanapi.Device{
-			CollectionId: spanapi.PtrString(r.CollectionID),
-			Imsi:         spanapi.PtrString(r.IMSI),
-			Imei:         spanapi.PtrString(r.IMEI),
-			Tags:         &tags,
-		}).Execute()
-	if err != nil {
-		return err
+	device := spanapi.Device{
+		CollectionId: &r.CollectionID,
+		Imsi:         &r.IMSI,
+		Imei:         &r.IMEI,
+		Tags:         &map[string]string{},
 	}
 
-	fmt.Printf("created device with id '%s'\n", *device.DeviceId)
+	if r.Name != "" {
+		(*device.Tags)["name"] = r.Name
+	}
+
+	dev, res, err := client.DevicesApi.CreateDevice(ctx, r.CollectionID).Body(device).Execute()
+	if err != nil {
+		return apiError(res, err)
+	}
+
+	fmt.Printf("created device %s\n", *dev.DeviceId)
 	return nil
 }
 
-func (r *getDevice) Execute([]string) error {
-	client := spanapi.NewAPIClient(clientConfig())
-	ctx, cancel := spanContext()
+func (r *listDevices) Execute([]string) error {
+	client, ctx, cancel := newSpanAPIClient()
 	defer cancel()
 
-	helpers.CheckVersion(ctx, client)
-
-	device, _, err := client.DevicesApi.RetrieveDevice(ctx, r.CollectionID, r.DeviceID).Execute()
+	resp, res, err := client.DevicesApi.ListDevices(ctx, r.CollectionID).Execute()
 	if err != nil {
-		return err
-	}
-	json, err := json.MarshalIndent(device, "", "    ")
-	if err != nil {
-		return fmt.Errorf("unable to marshal '%v' to JSON: %v", device, err)
-	}
-	fmt.Printf("%s\n", json)
-	return nil
-}
-
-func (r *listDevice) Execute([]string) error {
-	client := spanapi.NewAPIClient(clientConfig())
-	ctx, cancel := spanContext()
-	defer cancel()
-
-	helpers.CheckVersion(ctx, client)
-
-	devices, _, err := client.DevicesApi.ListDevices(ctx, r.CollectionID).Execute()
-	if err != nil {
-		return err
+		return apiError(res, err)
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-	fmt.Fprintf(w, strings.Join([]string{"DeviceID", "IMSI", "IMEI", "IP", "At", "Cell", "FW version", "State", "Tags"}, "\t")+"\n")
-	for _, dev := range *devices.Devices {
-		fmt.Fprintf(w, strings.Join([]string{
-			strPtr(dev.DeviceId),
-			strPtr(dev.Imsi),
-			strPtr(dev.Imei),
-			strPtr(dev.Network.AllocatedIp),
-			strPtr(dev.Network.AllocatedAt),
-			strPtr(dev.Network.CellId),
-			strPtr(dev.Firmware.FirmwareVersion),
-			strPtr(dev.Firmware.State),
-			tagsToString(*dev.Tags),
-		}, "\t")+"\n")
-	}
-	return w.Flush()
-}
-
-func (r *sendDevice) Execute([]string) error {
-	client := spanapi.NewAPIClient(clientConfig())
-	ctx, cancel := spanContext()
-	defer cancel()
-
-	helpers.CheckVersion(ctx, client)
-
-	payload := r.Text
-	if !r.IsBase64 {
-		payload = base64.StdEncoding.EncodeToString([]byte(r.Text))
+	if resp.Devices == nil {
+		fmt.Printf("no devices\n")
+		return nil
 	}
 
-	_, _, err := client.DevicesApi.SendMessage(ctx, r.CollectionID, r.DeviceID).Body(
-		spanapi.SendMessageRequest{
-			CollectionId: spanapi.PtrString(r.CollectionID),
-			DeviceId:     spanapi.PtrString(r.DeviceID),
-			Port:         spanapi.PtrInt32(r.Port),
-			Payload:      spanapi.PtrString(payload),
-			Transport:    spanapi.PtrString(r.Transport),
-			CoapPath:     spanapi.PtrString(r.CoapPath),
-		}).Execute()
-	return err
-}
-
-func (r *deleteDevice) Execute([]string) error {
-	if !r.YesIAmSure {
-		if !verifyDeleteIntent() {
-			return fmt.Errorf("user aborted delete")
+	if r.Format == "json" {
+		json, err := json.MarshalIndent(resp.Devices, "", "  ")
+		if err != nil {
+			return err
 		}
+		fmt.Println(string(json))
+		return nil
 	}
 
-	client := spanapi.NewAPIClient(clientConfig())
-	ctx, cancel := spanContext()
-	defer cancel()
+	t := newTableOutput(r.Format, r.NoColor, r.PageSize)
+	t.SetTitle("Devices in %s", r.CollectionID)
+	t.AppendHeader(table.Row{"DeviceID", "Name", "Last conn", "FW", "IMSI", "IMEI"})
 
-	helpers.CheckVersion(ctx, client)
+	for _, device := range *resp.Devices {
+		// only truncate name if we output as 'text'
+		name := device.GetTags()["name"]
+		if r.Format == "text" {
+			name = truncateString(name, 25)
+		}
 
-	_, _, err := client.DevicesApi.DeleteDevice(ctx, r.CollectionID, r.DeviceID).Execute()
-	if err != nil {
-		return err
+		allocatedAt := "-"
+		if *device.Network.AllocatedAt != "0" {
+			allocatedAt = localTimeFormat(*device.Network.AllocatedAt)
+		}
+
+		fwVersion := "-"
+		if *device.Firmware.FirmwareVersion != "" {
+			fwVersion = *device.Firmware.FirmwareVersion
+		}
+
+		t.AppendRow(table.Row{
+			*device.DeviceId,
+			name,
+			allocatedAt,
+			fwVersion,
+			*device.Imsi,
+			*device.Imei,
+		})
 	}
+	renderTable(t, r.Format)
 
-	fmt.Printf("deleted device '%s'\n", r.DeviceID)
 	return nil
 }

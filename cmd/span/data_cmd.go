@@ -12,7 +12,6 @@ import (
 	"unicode"
 
 	"github.com/lab5e/go-spanapi/v4"
-	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type dataCmd struct {
@@ -36,11 +35,8 @@ func (r *dataCmd) Execute([]string) error {
 }
 
 func (r *dataCmd) listDeviceData() error {
-	client := spanapi.NewAPIClient(clientConfig())
-	ctx, cancel := spanContext()
+	client, ctx, cancel := newSpanAPIClient()
 	defer cancel()
-
-	helpers.CheckVersion(ctx, client)
 
 	req := client.DevicesApi.ListDeviceData(ctx, r.CollectionID, r.DeviceID)
 	if r.Start != "" {
@@ -59,12 +55,10 @@ func (r *dataCmd) listDeviceData() error {
 }
 
 func (r *dataCmd) listCollectionData() error {
-	client := spanapi.NewAPIClient(clientConfig())
-	ctx, cancel := spanContext()
+	client, ctx, cancel := newSpanAPIClient()
 	defer cancel()
 
-	helpers.CheckVersion(ctx, client)
-	req := client.DevicesApi.ListDeviceData(ctx, r.CollectionID, r.DeviceID)
+	req := client.CollectionsApi.ListCollectionData(ctx, r.CollectionID)
 	if r.Start != "" {
 		req.Start(r.Start)
 	}
