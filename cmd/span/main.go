@@ -4,14 +4,12 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -164,18 +162,6 @@ func msSinceEpochToTime(ts string) (int64, time.Time) {
 func localTimeFormat(ts string) string {
 	_, t := msSinceEpochToTime(ts)
 	return t.Local().Format(timeFmt)
-}
-
-func tagsToMap(param []string) (map[string]string, error) {
-	tags := make(map[string]string)
-	for _, str := range param {
-		nameValue := strings.Split(str, ":")
-		if len(nameValue) != 2 {
-			return nil, errors.New("invalid tag format, needs name:value string")
-		}
-		tags[strings.TrimSpace(nameValue[0])] = strings.TrimSpace(nameValue[1])
-	}
-	return tags, nil
 }
 
 func strPtr(s *string) string {

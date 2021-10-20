@@ -11,22 +11,35 @@ import (
 type deviceCmd struct {
 	Add    addDevice    `command:"add" description:"create device"`
 	Get    getDevice    `command:"get" description:"get device"`
+	Update updateDevice `command:"update" description:"update device"`
 	List   listDevices  `command:"list" alias:"ls" description:"list devices"`
 	Send   sendDevice   `command:"send" description:"send downstream message"`
 	Delete deleteDevice `command:"delete" alias:"del" description:"delete device"`
 }
 
 type addDevice struct {
-	CollectionID string   `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	Name         string   `long:"name" description:"device name"`
-	IMSI         string   `long:"imsi" description:"IMSI of device SIM" required:"yes"`
-	IMEI         string   `long:"imei" description:"IMEI of device" required:"yes"`
-	Tags         []string `long:"tag" description:"set tag value (name:value)"`
+	CollectionID     string   `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	Name             string   `long:"name" description:"device name"`
+	IMSI             string   `long:"imsi" description:"IMSI of device SIM" required:"yes"`
+	IMEI             string   `long:"imei" description:"IMEI of device" required:"yes"`
+	Tags             []string `long:"tag" description:"set tag value [name:value]"`
+	FirmwareTargetID string   `long:"firmware-target-id" description:"set the target firmware id"`
 }
 
 type getDevice struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
+}
+
+type updateDevice struct {
+	CollectionID     string   `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	NewCollectionID  string   `long:"new-collection-id" description:"Span collection ID you want to move device to"`
+	DeviceID         string   `long:"device-id" description:"device id" required:"yes"`
+	Name             string   `long:"name" description:"device name"`
+	IMSI             string   `long:"imsi" description:"IMSI of device SIM"`
+	IMEI             string   `long:"imei" description:"IMEI of device"`
+	Tags             []string `long:"tag" description:"set tag value [name:value]"`
+	FirmwareTargetID string   `long:"firmware-target-id" description:"set the target firmware id"`
 }
 
 type listDevices struct {
@@ -60,11 +73,10 @@ func (r *addDevice) Execute([]string) error {
 		CollectionId: &r.CollectionID,
 		Imsi:         &r.IMSI,
 		Imei:         &r.IMEI,
-		Tags:         &map[string]string{},
-	}
-
-	if r.Name != "" {
-		(*device.Tags)["name"] = r.Name
+		Tags:         tagMerge(&map[string]string{"name": r.Name}, r.Tags),
+		Firmware: &spanapi.FirmwareMetadata{
+			TargetFirmwareId: &r.FirmwareTargetID,
+		},
 	}
 
 	dev, res, err := client.DevicesApi.CreateDevice(ctx, r.CollectionID).Body(device).Execute()
@@ -73,6 +85,74 @@ func (r *addDevice) Execute([]string) error {
 	}
 
 	fmt.Printf("created device %s\n", *dev.DeviceId)
+	return nil
+}
+
+func (r *getDevice) Execute([]string) error {
+	client, ctx, cancel := newSpanAPIClient()
+	defer cancel()
+
+	device, res, err := client.DevicesApi.RetrieveDevice(ctx, r.CollectionID, r.DeviceID).Execute()
+	if err != nil {
+		return apiError(res, err)
+	}
+
+	jsonData, err := json.MarshalIndent(device, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(jsonData))
+	return nil
+}
+
+func (r *updateDevice) Execute([]string) error {
+	client, ctx, cancel := newSpanAPIClient()
+	defer cancel()
+
+	device, res, err := client.DevicesApi.RetrieveDevice(ctx, r.CollectionID, r.DeviceID).Execute()
+	if err != nil {
+		return apiError(res, err)
+	}
+	if r.IMSI != "" {
+		device.SetImsi(r.IMSI)
+	}
+	if r.IMEI != "" {
+		device.SetImei(r.IMEI)
+	}
+	if r.Name != "" {
+		r.Tags = append(r.Tags, fmt.Sprintf(`name:"%s"`, r.Name))
+	}
+	if r.FirmwareTargetID != "" {
+		device.Firmware.SetTargetFirmwareId(r.FirmwareTargetID)
+	}
+
+	var newCollectionID *string = nil
+	if r.NewCollectionID != "" {
+		newCollectionID = &r.NewCollectionID
+	}
+
+	var firmwareMetadata *spanapi.FirmwareMetadata = nil
+	if r.FirmwareTargetID != "" {
+		firmwareMetadata = &spanapi.FirmwareMetadata{
+			TargetFirmwareId: &r.FirmwareTargetID,
+		}
+	}
+
+	deviceUpdated, res, err := client.DevicesApi.UpdateDevice(ctx, r.CollectionID, r.DeviceID).Body(spanapi.UpdateDeviceRequest{
+		ExistingCollectionId: device.CollectionId,
+		DeviceId:             device.DeviceId,
+		CollectionId:         newCollectionID,
+		Imsi:                 device.Imsi,
+		Imei:                 device.Imei,
+		Tags:                 tagMerge(device.Tags, r.Tags),
+		Firmware:             firmwareMetadata,
+	}).Execute()
+	if err != nil {
+		return apiError(res, err)
+	}
+
+	fmt.Printf("updated device '%s'\n", *deviceUpdated.DeviceId)
 	return nil
 }
 
@@ -131,5 +211,24 @@ func (r *listDevices) Execute([]string) error {
 	}
 	renderTable(t, r.Format)
 
+	return nil
+}
+
+func (r *deleteDevice) Execute([]string) error {
+	if !r.YesIAmSure {
+		if !verifyDeleteIntent() {
+			return fmt.Errorf("user aborted delete")
+		}
+	}
+
+	client, ctx, cancel := newSpanAPIClient()
+	defer cancel()
+
+	device, res, err := client.DevicesApi.DeleteDevice(ctx, r.CollectionID, r.DeviceID).Execute()
+	if err != nil {
+		return apiError(res, err)
+	}
+
+	fmt.Printf("deleted device %s in collection %s\n", *device.DeviceId, *device.CollectionId)
 	return nil
 }

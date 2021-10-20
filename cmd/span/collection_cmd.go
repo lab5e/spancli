@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/lab5e/go-spanapi/v4"
@@ -50,11 +49,6 @@ type updateCollection struct {
 }
 
 func (r *addCollection) Execute([]string) error {
-	tags, err := tagsToMap(r.Tags)
-	if err != nil {
-		return err
-	}
-
 	client, ctx, cancel := newSpanAPIClient()
 	defer cancel()
 
@@ -66,7 +60,7 @@ func (r *addCollection) Execute([]string) error {
 			Msisdn:   &r.MaskMSISDN,
 			Location: &r.MaskLocation,
 		},
-		Tags: &tags,
+		Tags: tagsFromArgs(r.Tags),
 	}
 
 	if r.Name != "" {
@@ -174,26 +168,13 @@ func (u *updateCollection) Execute([]string) error {
 		return err
 	}
 
-	if collection.Tags == nil {
-		tags := make(map[string]string)
-		collection.Tags = &tags
-	}
+	collection.Tags = tagMerge(collection.Tags, u.Tags)
 
-	t := *collection.Tags
-
-	for _, val := range u.Tags {
-		nameValue := strings.Split(val, ":")
-		if len(nameValue) != 2 {
-			return errors.New("tag name incorrectly formatted (needs name:value)")
-		}
-		t[nameValue[0]] = nameValue[1]
-	}
-
-	_, _, err = client.CollectionsApi.UpdateCollection(ctx, u.CollectionID).Body(collection).Execute()
+	collectionUpdated, res, err := client.CollectionsApi.UpdateCollection(ctx, u.CollectionID).Body(collection).Execute()
 	if err != nil {
-		return err
+		return apiError(res, err)
 	}
 
-	fmt.Printf("updated collection '%s'\n", u.CollectionID)
+	fmt.Printf("updated collection '%s'\n", *collectionUpdated.CollectionId)
 	return nil
 }
