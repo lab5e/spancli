@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 
@@ -53,7 +54,7 @@ type sendDevice struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
 	Port         int32  `long:"port" default:"1234" description:"destination port on device" required:"yes"`
-	Transport    string `long:"transport" choice:"udp-push" choice:"udp-pull" choice:"coap-push" choice:"coap-pull" description:"transport" required:"yes"` //nolint (choice tags confusess linter)
+	Transport    string `long:"transport" choice:"udp" choice:"udp-pull" choice:"coap" choice:"coap-pull" description:"transport" required:"yes"` //nolint (choice tags confusess linter)
 	CoapPath     string `long:"coap-path" description:"CoAP path"`
 	Text         string `long:"text" description:"text payload" required:"yes"`
 	IsBase64     bool   `long:"base64" description:"indicates that --text is base64 data"`
@@ -211,6 +212,31 @@ func (r *listDevices) Execute([]string) error {
 	}
 	renderTable(t, r.Format)
 
+	return nil
+}
+
+func (r *sendDevice) Execute([]string) error {
+	client, ctx, cancel := newSpanAPIClient()
+	defer cancel()
+
+	payload := r.Text
+	if !r.IsBase64 {
+		payload = base64.StdEncoding.EncodeToString([]byte(r.Text))
+	}
+
+	msgResponse, res, err := client.DevicesApi.SendMessage(ctx, r.CollectionID, r.DeviceID).Body(spanapi.SendMessageRequest{
+		CollectionId: &r.CollectionID,
+		DeviceId:     &r.DeviceID,
+		Port:         &r.Port,
+		Payload:      &payload,
+		Transport:    &r.Transport,
+		CoapPath:     &r.CoapPath,
+	}).Execute()
+	if err != nil {
+		return apiError(res, err)
+	}
+
+	fmt.Printf("sent %d bytes to device %s\n", *msgResponse.BytesSent, *msgResponse.DeviceId)
 	return nil
 }
 
