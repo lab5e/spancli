@@ -2,7 +2,7 @@ ifeq ($(GOPATH),)
 GOPATH := $(HOME)/go
 endif
 
-all: test span
+all: test vet span
 
 release: all
 	@cd cmd/span && GOOS=darwin go build -o ../../bin/macos/span && cd ../../bin/macos && tar czf ../span-macOS.tar.gz span
@@ -10,15 +10,24 @@ release: all
 	@cd cmd/span && GOOS=windows go build -o ../../bin/windows/span.exe  && cd ../../bin/windows && zip ../span-windows.zip span.exe
 
 clean:
-	@find . -name "*-wal" -delete
-	@find . -name "*-shm" -delete
-	@rm -f bin/*.linux
+	@rm -rf bin
 
 span:
 	@cd cmd/span && go build -o ../../bin/span
 
 test:
 	@go test ./...
+
+vet:
+	@go vet ./...
+
+check: lint vet staticcheck
+
+lint:
+	@revive -exclude ./... 
+
+staticcheck:
+	@staticcheck ./...
 
 test_verbose:
 	@go test ./... -v
