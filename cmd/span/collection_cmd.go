@@ -175,6 +175,6 @@ func (u *updateCollection) Execute([]string) error {
 		return apiError(res, err)
 	}
 
-	fmt.Printf("updated collection '%s'\n", *collectionUpdated.CollectionId)
+	fmt.Printf("updated collection %s\n", *collectionUpdated.CollectionId)
 	return nil
 }

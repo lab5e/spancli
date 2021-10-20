@@ -153,7 +153,7 @@ func (r *updateDevice) Execute([]string) error {
 		return apiError(res, err)
 	}
 
-	fmt.Printf("updated device '%s'\n", *deviceUpdated.DeviceId)
+	fmt.Printf("updated device %s\n", *deviceUpdated.DeviceId)
 	return nil
 }
 
