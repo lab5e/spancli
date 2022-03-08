@@ -1,3 +1,4 @@
 cmd/span/span
 bin
+env.sh
 

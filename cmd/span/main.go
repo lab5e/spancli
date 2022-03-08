@@ -22,15 +22,19 @@ import (
 )
 
 type options struct {
-	Token   string        `long:"token" env:"SPAN_API_TOKEN" description:"span API token" required:"yes"`
-	Timeout time.Duration `long:"timeout" default:"15s" description:"timeout for operation"`
-	Debug   bool          `long:"debug" description:"turn on debug output"`
+	Token            string        `long:"token" env:"SPAN_API_TOKEN" description:"span API token" required:"yes"`
+	OverrideEndpoint string        `long:"endpoint" env:"SPAN_API_ENDPOINT" description:"span endpoint override" required:"no"`
+	Timeout          time.Duration `long:"timeout" default:"15s" description:"timeout for operation"`
+	Debug            bool          `long:"debug" description:"turn on debug output"`
 
 	Team       teamCmd       `command:"team" description:"team management"`
 	Invite     inviteCmd     `command:"invite" description:"manage team invitations"`
 	Collection collectionCmd `command:"collection" alias:"col" description:"collection management"`
 	Device     deviceCmd     `command:"device" alias:"dev" description:"device management"`
 	Data       dataCmd       `command:"data" description:"data listing commands"`
+	Output     outputCmd     `command:"output" alias:"out" description:"output management"`
+	Cert       certCmd       `command:"cert" description:"certificate management"`
+	Firmware   firmwareCmd   `command:"fw" description:"firmware management"`
 	Version    versionCmd    `command:"version" description:"show version"`
 }
 
@@ -106,7 +110,11 @@ func apiError(res *http.Response, e error) error {
 func newSpanAPIClient() (*spanapi.APIClient, context.Context, context.CancelFunc) {
 	config := spanapi.NewConfiguration()
 	config.Debug = opt.Debug
-
+	if opt.OverrideEndpoint != "" {
+		config.Servers = spanapi.ServerConfigurations{
+			spanapi.ServerConfiguration{URL: "http://127.0.0.1:8080/span"},
+		}
+	}
 	ctx, done := apitools.ContextWithAuthAndTimeout(opt.Token, opt.Timeout)
 	client := spanapi.NewAPIClient(config)
 	helpers.CheckVersion(ctx, client)
