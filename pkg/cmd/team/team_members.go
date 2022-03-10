@@ -1,4 +1,4 @@
-package main
+package team
 
 import (
 	"encoding/json"
@@ -27,12 +27,12 @@ type deleteMember struct {
 }
 
 func (r *listMembers) Execute([]string) error {
-	client, ctx, cancel := newUserAPIClient()
+	client, ctx, cancel := helpers.NewUserAPIClient()
 	defer cancel()
 
 	team, res, err := client.TeamsApi.RetrieveTeam(ctx, r.TeamID).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	if r.Format == "json" {
@@ -57,17 +57,17 @@ func (r *listMembers) Execute([]string) error {
 
 func (r *deleteMember) Execute([]string) error {
 	if !r.YesIAmSure {
-		if !verifyDeleteIntent() {
+		if !helpers.VerifyDeleteIntent() {
 			return fmt.Errorf("user aborted delete")
 		}
 	}
 
-	client, ctx, cancel := newUserAPIClient()
+	client, ctx, cancel := helpers.NewUserAPIClient()
 	defer cancel()
 
 	team, res, err := client.TeamsApi.DeleteMember(ctx, r.TeamID, r.UserID).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("deleted member %s from %s\n", r.UserID, *team.TeamId)

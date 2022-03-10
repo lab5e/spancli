@@ -1,4 +1,4 @@
-package main
+package team
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
-type teamCmd struct {
+type Command struct {
 	Add    addTeam    `command:"add" description:"create new team"`
 	Get    getTeam    `command:"get" description:"get team details"`
 	List   listTeams  `command:"list" alias:"ls" description:"list teams"`
@@ -38,7 +38,7 @@ type deleteTeam struct {
 }
 
 func (r *addTeam) Execute([]string) error {
-	client, ctx, cancel := newUserAPIClient()
+	client, ctx, cancel := helpers.NewUserAPIClient()
 	defer cancel()
 
 	team := userapi.Team{
@@ -51,7 +51,7 @@ func (r *addTeam) Execute([]string) error {
 
 	team, res, err := client.TeamsApi.CreateTeam(ctx).Body(team).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("created team %s\n", *team.TeamId)
@@ -59,12 +59,12 @@ func (r *addTeam) Execute([]string) error {
 }
 
 func (r *getTeam) Execute([]string) error {
-	client, ctx, cancel := newUserAPIClient()
+	client, ctx, cancel := helpers.NewUserAPIClient()
 	defer cancel()
 
 	team, res, err := client.TeamsApi.RetrieveTeam(ctx, r.TeamID).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	jsonData, err := json.MarshalIndent(team, "", "  ")
@@ -77,12 +77,12 @@ func (r *getTeam) Execute([]string) error {
 }
 
 func (r *listTeams) Execute([]string) error {
-	client, ctx, cancel := newUserAPIClient()
+	client, ctx, cancel := helpers.NewUserAPIClient()
 	defer cancel()
 
 	teamList, res, err := client.TeamsApi.ListTeams(ctx).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	if r.Format == "json" {
@@ -102,7 +102,7 @@ func (r *listTeams) Execute([]string) error {
 		// only truncate name if we output as 'text'
 		name := team.GetTags()["name"]
 		if r.Format == "text" {
-			name = truncateString(name, 25)
+			name = helpers.EllipsisString(name, 25)
 		}
 
 		if team.GetIsPrivate() {
@@ -118,17 +118,17 @@ func (r *listTeams) Execute([]string) error {
 
 func (r *deleteTeam) Execute([]string) error {
 	if !r.YesIAmSure {
-		if !verifyDeleteIntent() {
+		if !helpers.VerifyDeleteIntent() {
 			return fmt.Errorf("user aborted delete")
 		}
 	}
 
-	client, ctx, cancel := newUserAPIClient()
+	client, ctx, cancel := helpers.NewUserAPIClient()
 	defer cancel()
 
 	team, res, err := client.TeamsApi.DeleteTeam(ctx, r.TeamID).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("deleted team %s\n", *team.TeamId)

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var params = []string{
+var parms = []string{
 	``,
 	`  `,
 	`nonsense`,
@@ -31,7 +31,7 @@ var meta = &map[string]string{
 }
 
 func TestTagRegex(t *testing.T) {
-	for _, s := range params {
+	for _, s := range parms {
 		res := tagRegex.FindStringSubmatch(s)
 		if len(res) == 0 {
 			assert.True(t, strings.TrimSpace(s) == "" || strings.TrimSpace(s) == "nonsense")
@@ -44,7 +44,7 @@ func TestTagRegex(t *testing.T) {
 }
 
 func TestMetaToMap(t *testing.T) {
-	mm := TagMerge(nil, params)
+	mm := TagMerge(nil, parms)
 	assert.Len(t, *mm, 6)
 	assert.Equal(t, (*mm)["foo"], "bar baz")
 	assert.Equal(t, (*mm)["fooBar"], "bar")
@@ -53,7 +53,7 @@ func TestMetaToMap(t *testing.T) {
 }
 
 func TestMetaMerge(t *testing.T) {
-	m := TagMerge(meta, params)
+	m := TagMerge(meta, parms)
 	assert.Len(t, *m, 7)
 	assert.Contains(t, *m, "foo")
 	assert.Contains(t, *m, "foo-bar")

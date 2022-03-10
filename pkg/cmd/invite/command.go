@@ -1,4 +1,4 @@
-package main
+package invite
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
-type inviteCmd struct {
+type Command struct {
 	Add    addInvite    `command:"add" description:"add invite for team"`
 	List   listInvite   `command:"list" alias:"ls" description:"list invites for team"`
 	Delete deleteInvite `command:"delete" alias:"del" description:"delete invite from team"`
@@ -38,12 +38,12 @@ type acceptInvite struct {
 }
 
 func (r *addInvite) Execute([]string) error {
-	client, ctx, cancel := newUserAPIClient()
+	client, ctx, cancel := helpers.NewUserAPIClient()
 	defer cancel()
 
 	invite, res, err := client.TeamsApi.GenerateInvite(ctx, r.TeamID).Body(*userapi.NewInviteRequest()).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("created invite code for team %s: %s\n", r.TeamID, *invite.Code)
@@ -51,12 +51,12 @@ func (r *addInvite) Execute([]string) error {
 }
 
 func (r *listInvite) Execute([]string) error {
-	client, ctx, cancel := newUserAPIClient()
+	client, ctx, cancel := helpers.NewUserAPIClient()
 	defer cancel()
 
 	invites, res, err := client.TeamsApi.ListInvites(ctx, r.TeamID).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	if r.Format == "json" {
@@ -79,7 +79,7 @@ func (r *listInvite) Execute([]string) error {
 	t.SetTitle("Invites for team " + r.TeamID)
 	t.AppendHeader(table.Row{"Code", "Created"})
 	for _, invite := range *invites.Invites {
-		createdAt := localTimeFormat(*invite.CreatedAt)
+		createdAt := helpers.LocalTimeFormat(*invite.CreatedAt)
 		t.AppendRow(table.Row{*invite.Code, createdAt})
 	}
 	helpers.RenderTable(t, r.Format)
@@ -88,18 +88,18 @@ func (r *listInvite) Execute([]string) error {
 }
 
 func (r *deleteInvite) Execute([]string) error {
-	client, ctx, cancel := newUserAPIClient()
+	client, ctx, cancel := helpers.NewUserAPIClient()
 	defer cancel()
 
 	if !r.YesIAmSure {
-		if !verifyDeleteIntent() {
+		if !helpers.VerifyDeleteIntent() {
 			return fmt.Errorf("user aborted delete")
 		}
 	}
 
 	resp, res, err := client.TeamsApi.DeleteInvite(ctx, r.TeamID, r.Code).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("deleted invite %s from %s\n", *resp.Invite.Code, r.TeamID)
@@ -108,12 +108,12 @@ func (r *deleteInvite) Execute([]string) error {
 }
 
 func (r *acceptInvite) Execute([]string) error {
-	client, ctx, cancel := newUserAPIClient()
+	client, ctx, cancel := helpers.NewUserAPIClient()
 	defer cancel()
 
 	resp, res, err := client.TeamsApi.AcceptInvite(ctx).Body(userapi.AcceptInviteRequest{Code: &r.Code}).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("accepted invite to team %s", *resp.TeamId)

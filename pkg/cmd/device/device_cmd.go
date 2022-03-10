@@ -1,4 +1,4 @@
-package main
+package device
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
-type deviceCmd struct {
+type Command struct {
 	Add    addDevice    `command:"add" description:"create device"`
 	Get    getDevice    `command:"get" description:"get device"`
 	Update updateDevice `command:"update" description:"update device"`
@@ -56,7 +56,7 @@ type deleteDevice struct {
 }
 
 func (r *addDevice) Execute([]string) error {
-	client, ctx, cancel := newSpanAPIClient()
+	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
 	device := spanapi.CreateDeviceRequest{
@@ -70,7 +70,7 @@ func (r *addDevice) Execute([]string) error {
 
 	dev, res, err := client.DevicesApi.CreateDevice(ctx, r.CollectionID).Body(device).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("created device %s\n", *dev.DeviceId)
@@ -78,12 +78,12 @@ func (r *addDevice) Execute([]string) error {
 }
 
 func (r *getDevice) Execute([]string) error {
-	client, ctx, cancel := newSpanAPIClient()
+	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
 	device, res, err := client.DevicesApi.RetrieveDevice(ctx, r.CollectionID, r.DeviceID).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	jsonData, err := json.MarshalIndent(device, "", "  ")
@@ -96,12 +96,12 @@ func (r *getDevice) Execute([]string) error {
 }
 
 func (r *updateDevice) Execute([]string) error {
-	client, ctx, cancel := newSpanAPIClient()
+	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
 	device, res, err := client.DevicesApi.RetrieveDevice(ctx, r.CollectionID, r.DeviceID).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 	if r.IMSI != "" {
 		device.SetImsi(r.IMSI)
@@ -136,7 +136,7 @@ func (r *updateDevice) Execute([]string) error {
 		Firmware:     firmwareMetadata,
 	}).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("updated device %s\n", *deviceUpdated.DeviceId)
@@ -144,12 +144,12 @@ func (r *updateDevice) Execute([]string) error {
 }
 
 func (r *listDevices) Execute([]string) error {
-	client, ctx, cancel := newSpanAPIClient()
+	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
 	resp, res, err := client.DevicesApi.ListDevices(ctx, r.CollectionID).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	if resp.Devices == nil {
@@ -174,12 +174,12 @@ func (r *listDevices) Execute([]string) error {
 		// only truncate name if we output as 'text'
 		name := device.GetTags()["name"]
 		if r.Format == "text" {
-			name = truncateString(name, 25)
+			name = helpers.EllipsisString(name, 25)
 		}
 
 		allocatedAt := "-"
 		if *device.Network.AllocatedAt != "0" {
-			allocatedAt = localTimeFormat(*device.Network.AllocatedAt)
+			allocatedAt = helpers.LocalTimeFormat(*device.Network.AllocatedAt)
 		}
 
 		fwVersion := "-"
@@ -203,17 +203,17 @@ func (r *listDevices) Execute([]string) error {
 
 func (r *deleteDevice) Execute([]string) error {
 	if !r.YesIAmSure {
-		if !verifyDeleteIntent() {
+		if !helpers.VerifyDeleteIntent() {
 			return fmt.Errorf("user aborted delete")
 		}
 	}
 
-	client, ctx, cancel := newSpanAPIClient()
+	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
 	device, res, err := client.DevicesApi.DeleteDevice(ctx, r.CollectionID, r.DeviceID).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("deleted device %s in collection %s\n", *device.DeviceId, *device.CollectionId)

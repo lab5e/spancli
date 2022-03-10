@@ -1,4 +1,4 @@
-package main
+package version
 
 import (
 	"fmt"
@@ -6,12 +6,12 @@ import (
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
-type versionCmd struct {
+type Command struct {
 	// No parameters
 }
 
-func (v *versionCmd) Execute([]string) error {
-	client, ctx, cancel := newSpanAPIClient()
+func (*Command) Execute([]string) error {
+	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
 	info, _, err := client.SystemApi.GetSystemInfo(ctx).Execute()

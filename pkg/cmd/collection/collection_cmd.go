@@ -1,4 +1,4 @@
-package main
+package collection
 
 import (
 	"encoding/json"
@@ -9,12 +9,16 @@ import (
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
-type collectionCmd struct {
+type Command struct {
 	Add    addCollection    `command:"add" description:"create new collection"`
 	Get    getCollection    `command:"get" description:"get collection details"`
 	List   listCollection   `command:"list" alias:"ls" description:"list collections"`
 	Delete deleteCollection `command:"delete" alias:"del" description:"delete collection"`
 	Update updateCollection `command:"update" alias:"up" description:"update collection"`
+}
+
+func (*Command) Execute([]string) error {
+	return nil
 }
 
 type addCollection struct {
@@ -44,7 +48,7 @@ type updateCollection struct {
 }
 
 func (r *addCollection) Execute([]string) error {
-	client, ctx, cancel := newSpanAPIClient()
+	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
 	collection := spanapi.CreateCollectionRequest{
@@ -58,7 +62,7 @@ func (r *addCollection) Execute([]string) error {
 
 	col, res, err := client.CollectionsApi.CreateCollection(ctx).Body(collection).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("created collection %s\n", *col.CollectionId)
@@ -66,12 +70,12 @@ func (r *addCollection) Execute([]string) error {
 }
 
 func (r *getCollection) Execute([]string) error {
-	client, ctx, cancel := newSpanAPIClient()
+	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
 	col, res, err := client.CollectionsApi.RetrieveCollection(ctx, r.CollectionID).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	jsonData, err := json.MarshalIndent(col, "", "  ")
@@ -85,17 +89,17 @@ func (r *getCollection) Execute([]string) error {
 
 func (r *deleteCollection) Execute([]string) error {
 	if !r.YesIAmSure {
-		if !verifyDeleteIntent() {
+		if !helpers.VerifyDeleteIntent() {
 			return fmt.Errorf("user aborted delete")
 		}
 	}
 
-	client, ctx, cancel := newSpanAPIClient()
+	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
 	col, res, err := client.CollectionsApi.DeleteCollection(ctx, r.CollectionID).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("deleted collection %s\n", *col.CollectionId)
@@ -103,12 +107,12 @@ func (r *deleteCollection) Execute([]string) error {
 }
 
 func (r *listCollection) Execute([]string) error {
-	client, ctx, cancel := newSpanAPIClient()
+	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
 	collections, res, err := client.CollectionsApi.ListCollections(ctx).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	if collections.Collections == nil {
@@ -132,7 +136,7 @@ func (r *listCollection) Execute([]string) error {
 		// only truncate name if we output as 'text'
 		name := col.GetTags()["name"]
 		if r.Format == "text" {
-			name = truncateString(name, 25)
+			name = helpers.EllipsisString(name, 25)
 		}
 
 		t.AppendRow(table.Row{
@@ -146,7 +150,7 @@ func (r *listCollection) Execute([]string) error {
 }
 
 func (u *updateCollection) Execute([]string) error {
-	client, ctx, cancel := newSpanAPIClient()
+	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
 	update := spanapi.UpdateCollectionRequest{
@@ -155,7 +159,7 @@ func (u *updateCollection) Execute([]string) error {
 
 	collectionUpdated, res, err := client.CollectionsApi.UpdateCollection(ctx, u.CollectionID).Body(update).Execute()
 	if err != nil {
-		return apiError(res, err)
+		return helpers.ApiError(res, err)
 	}
 
 	fmt.Printf("updated collection %s\n", *collectionUpdated.CollectionId)
