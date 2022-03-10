@@ -6,6 +6,7 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/lab5e/go-userapi"
+	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type teamCmd struct {
@@ -93,7 +94,7 @@ func (r *listTeams) Execute([]string) error {
 		return nil
 	}
 
-	t := newTableOutput(r.Format, r.NoColor, r.PageSize)
+	t := helpers.NewTableOutput(r.Format, r.NoColor, r.PageSize)
 	t.SetTitle("Teams")
 	t.AppendHeader(table.Row{"ID", "Name"})
 
@@ -110,7 +111,7 @@ func (r *listTeams) Execute([]string) error {
 
 		t.AppendRow(table.Row{*team.TeamId, name})
 	}
-	renderTable(t, r.Format)
+	helpers.RenderTable(t, r.Format)
 
 	return nil
 }

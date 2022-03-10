@@ -2,12 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/lab5e/go-spanapi/v4"
+	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type collectionCmd struct {
@@ -19,13 +18,9 @@ type collectionCmd struct {
 }
 
 type addCollection struct {
-	TeamID       string   `long:"team-id" description:"team the collection belongs to" required:"yes"`
-	Tags         []string `long:"tag" description:"Set tag value (name:value)"`
-	Name         string   `long:"name" description:"name of the collection"`
-	MaskIMSI     bool     `long:"mask-imsi" description:"mask IMSI"`
-	MaskIMEI     bool     `long:"mask-imei" description:"mask IMEI"`
-	MaskLocation bool     `long:"mask-location" description:"mask location"`
-	MaskMSISDN   bool     `long:"mask-msisdn" description:"mask MSISDN (phone number)"`
+	TeamID string   `long:"team-id" description:"team the collection belongs to" required:"yes"`
+	Tags   []string `long:"tag" description:"Set tag value (name:value)"`
+	Name   string   `long:"name" description:"name of the collection"`
 }
 
 type getCollection struct {
@@ -52,15 +47,9 @@ func (r *addCollection) Execute([]string) error {
 	client, ctx, cancel := newSpanAPIClient()
 	defer cancel()
 
-	collection := spanapi.Collection{
+	collection := spanapi.CreateCollectionRequest{
 		TeamId: &r.TeamID,
-		FieldMask: &spanapi.FieldMask{
-			Imsi:     &r.MaskIMSI,
-			Imei:     &r.MaskIMEI,
-			Msisdn:   &r.MaskMSISDN,
-			Location: &r.MaskLocation,
-		},
-		Tags: tagsFromArgs(r.Tags),
+		Tags:   helpers.TagMerge(nil, r.Tags),
 	}
 
 	if r.Name != "" {
@@ -136,10 +125,10 @@ func (r *listCollection) Execute([]string) error {
 		return nil
 	}
 
-	t := newTableOutput(r.Format, r.NoColor, r.PageSize)
+	t := helpers.NewTableOutput(r.Format, r.NoColor, r.PageSize)
 	t.SetTitle("Collections")
 	t.AppendHeader(table.Row{"ID", "Name", "TeamID"})
-	for _, col := range *collections.Collections {
+	for _, col := range collections.Collections {
 		// only truncate name if we output as 'text'
 		name := col.GetTags()["name"]
 		if r.Format == "text" {
@@ -152,7 +141,7 @@ func (r *listCollection) Execute([]string) error {
 			*col.TeamId,
 		})
 	}
-	renderTable(t, r.Format)
+	helpers.RenderTable(t, r.Format)
 	return nil
 }
 
@@ -160,17 +149,11 @@ func (u *updateCollection) Execute([]string) error {
 	client, ctx, cancel := newSpanAPIClient()
 	defer cancel()
 
-	collection, resp, err := client.CollectionsApi.RetrieveCollection(ctx, u.CollectionID).Execute()
-	if err != nil {
-		if resp.StatusCode == http.StatusNotFound {
-			return errors.New("unknown collection")
-		}
-		return err
+	update := spanapi.UpdateCollectionRequest{
+		Tags: helpers.TagMerge(nil, u.Tags),
 	}
 
-	collection.Tags = tagMerge(collection.Tags, u.Tags)
-
-	collectionUpdated, res, err := client.CollectionsApi.UpdateCollection(ctx, u.CollectionID).Body(collection).Execute()
+	collectionUpdated, res, err := client.CollectionsApi.UpdateCollection(ctx, u.CollectionID).Body(update).Execute()
 	if err != nil {
 		return apiError(res, err)
 	}

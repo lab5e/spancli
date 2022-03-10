@@ -51,7 +51,7 @@ func (r *dataCmd) listDeviceData() error {
 		return err
 	}
 
-	return r.listData(&data)
+	return r.listData(data)
 }
 
 func (r *dataCmd) listCollectionData() error {
@@ -71,7 +71,7 @@ func (r *dataCmd) listCollectionData() error {
 		return err
 	}
 
-	return r.listData(&data)
+	return r.listData(data)
 }
 
 func (r *dataCmd) listData(data *spanapi.ListDataResponse) error {
@@ -82,7 +82,7 @@ func (r *dataCmd) listData(data *spanapi.ListDataResponse) error {
 			fmt.Print("\n")
 		}
 
-		for n, d := range *data.Data {
+		for n, d := range data.Data {
 
 			var jsonData []byte
 			var err error
@@ -102,7 +102,7 @@ func (r *dataCmd) listData(data *spanapi.ListDataResponse) error {
 
 			fmt.Print(string(jsonData))
 
-			if n < len(*data.Data)-1 {
+			if n < len(data.Data)-1 {
 				fmt.Print(",")
 			}
 			if r.JSONPretty {
@@ -117,7 +117,7 @@ func (r *dataCmd) listData(data *spanapi.ListDataResponse) error {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
 	fmt.Fprintf(w, strings.Join([]string{"DeviceID", "Name", "Trans", "Received", "Payload"}, "\t")+"\n")
 
-	for _, d := range *data.Data {
+	for _, d := range data.Data {
 
 		if r.ISODate {
 			received, err := strconv.ParseInt(*d.Received, 10, 64)
@@ -142,11 +142,11 @@ func (r *dataCmd) listData(data *spanapi.ListDataResponse) error {
 		}
 		t := *d.Device.Tags
 		fmt.Fprintf(w, strings.Join([]string{
-			strPtr(d.Device.DeviceId),
+			*d.Device.DeviceId,
 			t["name"],
-			strPtr(d.Transport),
-			strPtr(d.Received),
-			strPtr(d.Payload),
+			*d.Transport,
+			*d.Received,
+			*d.Payload,
 		}, "\t")+"\n")
 	}
 

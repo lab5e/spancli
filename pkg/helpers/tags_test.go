@@ -1,4 +1,4 @@
-package main
+package helpers
 
 import (
 	"strings"
@@ -44,7 +44,7 @@ func TestTagRegex(t *testing.T) {
 }
 
 func TestMetaToMap(t *testing.T) {
-	mm := tagsFromArgs(params)
+	mm := TagMerge(nil, params)
 	assert.Len(t, *mm, 6)
 	assert.Equal(t, (*mm)["foo"], "bar baz")
 	assert.Equal(t, (*mm)["fooBar"], "bar")
@@ -53,7 +53,7 @@ func TestMetaToMap(t *testing.T) {
 }
 
 func TestMetaMerge(t *testing.T) {
-	m := tagMerge(meta, params)
+	m := TagMerge(meta, params)
 	assert.Len(t, *m, 7)
 	assert.Contains(t, *m, "foo")
 	assert.Contains(t, *m, "foo-bar")

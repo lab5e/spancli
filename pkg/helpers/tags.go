@@ -1,4 +1,4 @@
-package main
+package helpers
 
 import "regexp"
 
@@ -11,9 +11,9 @@ import "regexp"
 //
 var tagRegex = regexp.MustCompile(`^\s*(\S+):("?)(.*?)("?)\s*$`)
 
-// tagMerge merges existing metadata with the tag array we get from the command
-// line.
-func tagMerge(tags *map[string]string, args []string) *map[string]string {
+// TagMerge merges existing metadata with the tag array we get from the command
+// line. If the tags parameter is nil a new map is created
+func TagMerge(tags *map[string]string, args []string) *map[string]string {
 	if tags == nil {
 		tags = &map[string]string{}
 	}
@@ -25,9 +25,4 @@ func tagMerge(tags *map[string]string, args []string) *map[string]string {
 		(*tags)[res[1]] = res[3]
 	}
 	return tags
-}
-
-// tagsFromArgs creates a tag map from the arguments
-func tagsFromArgs(args []string) *map[string]string {
-	return tagMerge(nil, args)
 }

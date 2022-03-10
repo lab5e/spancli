@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type memberCmd struct {
@@ -43,14 +44,14 @@ func (r *listMembers) Execute([]string) error {
 		return nil
 	}
 
-	t := newTableOutput(r.Format, r.NoColor, r.PageSize)
+	t := helpers.NewTableOutput(r.Format, r.NoColor, r.PageSize)
 	t.SetTitle("Members of " + r.TeamID)
 	t.AppendHeader(table.Row{"UserID", "Role", "Email"})
 
 	for _, member := range *team.Members {
 		t.AppendRow(table.Row{*member.UserId, *member.Role, *member.User.Email})
 	}
-	renderTable(t, r.Format)
+	helpers.RenderTable(t, r.Format)
 	return nil
 }
 

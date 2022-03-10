@@ -18,7 +18,12 @@ import (
 	"github.com/lab5e/go-spanapi/v4/apitools"
 	"github.com/lab5e/go-userapi"
 	userapitools "github.com/lab5e/go-userapi/apitools"
+	"github.com/lab5e/spancli/pkg/cert"
+	"github.com/lab5e/spancli/pkg/firmware"
 	"github.com/lab5e/spancli/pkg/helpers"
+	"github.com/lab5e/spancli/pkg/inbox"
+	"github.com/lab5e/spancli/pkg/outbox"
+	"github.com/lab5e/spancli/pkg/output"
 )
 
 type options struct {
@@ -27,15 +32,16 @@ type options struct {
 	Timeout          time.Duration `long:"timeout" default:"15s" description:"timeout for operation"`
 	Debug            bool          `long:"debug" description:"turn on debug output"`
 
-	Team       teamCmd       `command:"team" description:"team management"`
-	Invite     inviteCmd     `command:"invite" description:"manage team invitations"`
-	Collection collectionCmd `command:"collection" alias:"col" description:"collection management"`
-	Device     deviceCmd     `command:"device" alias:"dev" description:"device management"`
-	Data       dataCmd       `command:"data" description:"data listing commands"`
-	Output     outputCmd     `command:"output" alias:"out" description:"output management"`
-	Cert       certCmd       `command:"cert" description:"certificate management"`
-	Firmware   firmwareCmd   `command:"fw" description:"firmware management"`
-	Version    versionCmd    `command:"version" description:"show version"`
+	Team       teamCmd          `command:"team" description:"team management"`
+	Invite     inviteCmd        `command:"invite" description:"manage team invitations"`
+	Collection collectionCmd    `command:"collection" alias:"col" description:"collection management"`
+	Device     deviceCmd        `command:"device" alias:"dev" description:"device management"`
+	Inbox      inbox.Command    `command:"inbox" description:"Read messages from devices"`
+	Outbox     outbox.Command   `command:"outbox" description:"Send messages to devices"`
+	Output     output.Command   `command:"output" alias:"out" description:"output management"`
+	Cert       cert.Command     `command:"cert" description:"certificate management"`
+	Firmware   firmware.Command `command:"fw" description:"firmware management"`
+	Version    versionCmd       `command:"version" description:"show version"`
 }
 
 var opt options
@@ -170,11 +176,4 @@ func msSinceEpochToTime(ts string) (int64, time.Time) {
 func localTimeFormat(ts string) string {
 	_, t := msSinceEpochToTime(ts)
 	return t.Local().Format(timeFmt)
-}
-
-func strPtr(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
 }

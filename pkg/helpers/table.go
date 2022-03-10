@@ -1,4 +1,4 @@
-package main
+package helpers
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 )
 
-// SpanCLIStyle is a custom style for the mesh CLI
-var SpanCLIStyle = table.Style{
+// SpanCLIStyle is the table style
+var spanCLIStyle = table.Style{
 	Name: "SpanCLIStyle",
 	Box:  table.StyleBoxLight,
 	Color: table.ColorOptions{
@@ -34,13 +34,13 @@ var SpanCLIStyle = table.Style{
 	},
 }
 
-// newTableOutput creates a new table writer with the specified settings
-func newTableOutput(format string, no_color bool, pagesize int) table.Writer {
+// NewTableOutput creates a new table writer with the specified settings
+func NewTableOutput(format string, no_color bool, pagesize int) table.Writer {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 
 	if !no_color {
-		t.SetStyle(SpanCLIStyle)
+		t.SetStyle(spanCLIStyle)
 	}
 
 	if pagesize != 0 {
@@ -50,8 +50,8 @@ func newTableOutput(format string, no_color bool, pagesize int) table.Writer {
 	return t
 }
 
-// renderTable renders the table according to settings
-func renderTable(t table.Writer, format string) {
+// RenderTable renders the table according to settings
+func RenderTable(t table.Writer, format string) {
 	switch format {
 	case "csv":
 		t.SetTitle("")

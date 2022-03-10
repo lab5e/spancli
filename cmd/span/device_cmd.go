@@ -1,12 +1,12 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/lab5e/go-spanapi/v4"
+	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type deviceCmd struct {
@@ -14,7 +14,6 @@ type deviceCmd struct {
 	Get    getDevice    `command:"get" description:"get device"`
 	Update updateDevice `command:"update" description:"update device"`
 	List   listDevices  `command:"list" alias:"ls" description:"list devices"`
-	Send   sendDevice   `command:"send" description:"send downstream message"`
 	Delete deleteDevice `command:"delete" alias:"del" description:"delete device"`
 }
 
@@ -50,16 +49,6 @@ type listDevices struct {
 	PageSize     int    `long:"page-size" description:"if set, chop output into pages of page-size length"`
 }
 
-type sendDevice struct {
-	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
-	Port         int32  `long:"port" default:"1234" description:"destination port on device" required:"yes"`
-	Transport    string `long:"transport" choice:"udp" choice:"udp-pull" choice:"coap" choice:"coap-pull" description:"transport" required:"yes"` //nolint (choice tags confusess linter)
-	CoapPath     string `long:"coap-path" description:"CoAP path"`
-	Text         string `long:"text" description:"text payload" required:"yes"`
-	IsBase64     bool   `long:"base64" description:"indicates that --text is base64 data"`
-}
-
 type deleteDevice struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
@@ -70,11 +59,10 @@ func (r *addDevice) Execute([]string) error {
 	client, ctx, cancel := newSpanAPIClient()
 	defer cancel()
 
-	device := spanapi.Device{
-		CollectionId: &r.CollectionID,
-		Imsi:         &r.IMSI,
-		Imei:         &r.IMEI,
-		Tags:         tagMerge(&map[string]string{"name": r.Name}, r.Tags),
+	device := spanapi.CreateDeviceRequest{
+		Imsi: &r.IMSI,
+		Imei: &r.IMEI,
+		Tags: helpers.TagMerge(&map[string]string{"name": r.Name}, r.Tags),
 		Firmware: &spanapi.FirmwareMetadata{
 			TargetFirmwareId: &r.FirmwareTargetID,
 		},
@@ -141,13 +129,11 @@ func (r *updateDevice) Execute([]string) error {
 	}
 
 	deviceUpdated, res, err := client.DevicesApi.UpdateDevice(ctx, r.CollectionID, r.DeviceID).Body(spanapi.UpdateDeviceRequest{
-		ExistingCollectionId: device.CollectionId,
-		DeviceId:             device.DeviceId,
-		CollectionId:         newCollectionID,
-		Imsi:                 device.Imsi,
-		Imei:                 device.Imei,
-		Tags:                 tagMerge(device.Tags, r.Tags),
-		Firmware:             firmwareMetadata,
+		CollectionId: newCollectionID,
+		Imsi:         device.Imsi,
+		Imei:         device.Imei,
+		Tags:         helpers.TagMerge(device.Tags, r.Tags),
+		Firmware:     firmwareMetadata,
 	}).Execute()
 	if err != nil {
 		return apiError(res, err)
@@ -180,11 +166,11 @@ func (r *listDevices) Execute([]string) error {
 		return nil
 	}
 
-	t := newTableOutput(r.Format, r.NoColor, r.PageSize)
+	t := helpers.NewTableOutput(r.Format, r.NoColor, r.PageSize)
 	t.SetTitle("Devices in %s", r.CollectionID)
 	t.AppendHeader(table.Row{"DeviceID", "Name", "Last conn", "FW", "IMSI", "IMEI"})
 
-	for _, device := range *resp.Devices {
+	for _, device := range resp.Devices {
 		// only truncate name if we output as 'text'
 		name := device.GetTags()["name"]
 		if r.Format == "text" {
@@ -210,33 +196,8 @@ func (r *listDevices) Execute([]string) error {
 			*device.Imei,
 		})
 	}
-	renderTable(t, r.Format)
+	helpers.RenderTable(t, r.Format)
 
-	return nil
-}
-
-func (r *sendDevice) Execute([]string) error {
-	client, ctx, cancel := newSpanAPIClient()
-	defer cancel()
-
-	payload := r.Text
-	if !r.IsBase64 {
-		payload = base64.StdEncoding.EncodeToString([]byte(r.Text))
-	}
-
-	msgResponse, res, err := client.DevicesApi.SendMessage(ctx, r.CollectionID, r.DeviceID).Body(spanapi.SendMessageRequest{
-		CollectionId: &r.CollectionID,
-		DeviceId:     &r.DeviceID,
-		Port:         &r.Port,
-		Payload:      &payload,
-		Transport:    &r.Transport,
-		CoapPath:     &r.CoapPath,
-	}).Execute()
-	if err != nil {
-		return apiError(res, err)
-	}
-
-	fmt.Printf("sent %d bytes to device %s\n", *msgResponse.BytesSent, *msgResponse.DeviceId)
 	return nil
 }
 

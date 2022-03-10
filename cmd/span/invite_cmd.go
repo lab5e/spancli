@@ -6,6 +6,7 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/lab5e/go-userapi"
+	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type inviteCmd struct {
@@ -74,14 +75,14 @@ func (r *listInvite) Execute([]string) error {
 		return nil
 	}
 
-	t := newTableOutput(r.Format, r.NoColor, r.PageSize)
+	t := helpers.NewTableOutput(r.Format, r.NoColor, r.PageSize)
 	t.SetTitle("Invites for team " + r.TeamID)
 	t.AppendHeader(table.Row{"Code", "Created"})
 	for _, invite := range *invites.Invites {
 		createdAt := localTimeFormat(*invite.CreatedAt)
 		t.AppendRow(table.Row{*invite.Code, createdAt})
 	}
-	renderTable(t, r.Format)
+	helpers.RenderTable(t, r.Format)
 
 	return nil
 }
