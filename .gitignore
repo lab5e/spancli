@@ -1,4 +1,8 @@
 cmd/span/span
 bin
 env.sh
+*.pem
+*.der
+*.hex
+*.crt
 
