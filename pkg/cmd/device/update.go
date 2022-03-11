@@ -39,25 +39,19 @@ func (r *updateDevice) Execute([]string) error {
 		device.Firmware.SetTargetFirmwareId(r.FirmwareTargetID)
 	}
 
-	var newCollectionID *string = nil
+	update := spanapi.UpdateDeviceRequest{}
+
 	if r.NewCollectionID != "" {
-		newCollectionID = &r.NewCollectionID
+		update.CollectionId = spanapi.PtrString(r.NewCollectionID)
 	}
 
-	var firmwareMetadata *spanapi.FirmwareMetadata = nil
 	if r.FirmwareTargetID != "" {
-		firmwareMetadata = &spanapi.FirmwareMetadata{
-			TargetFirmwareId: &r.FirmwareTargetID,
+		update.Firmware = &spanapi.FirmwareMetadata{
+			TargetFirmwareId: spanapi.PtrString(r.FirmwareTargetID),
 		}
 	}
 
-	deviceUpdated, res, err := client.DevicesApi.UpdateDevice(ctx, r.CollectionID, r.DeviceID).Body(spanapi.UpdateDeviceRequest{
-		CollectionId: newCollectionID,
-		Imsi:         device.Imsi,
-		Imei:         device.Imei,
-		Tags:         helpers.TagMerge(device.Tags, r.Tags),
-		Firmware:     firmwareMetadata,
-	}).Execute()
+	deviceUpdated, res, err := client.DevicesApi.UpdateDevice(ctx, r.CollectionID, r.DeviceID).Body(update).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
 	}
