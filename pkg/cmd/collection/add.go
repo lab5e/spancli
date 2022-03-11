@@ -30,7 +30,6 @@ func (r *addCollection) Execute([]string) error {
 	if err != nil {
 		return helpers.ApiError(res, err)
 	}
-
-	fmt.Printf("created collection %s\n", *col.CollectionId)
+	fmt.Printf("created collection %s\n", col.GetCollectionId())
 	return nil
 }

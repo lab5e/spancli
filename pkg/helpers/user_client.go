@@ -13,7 +13,6 @@ import (
 func NewUserAPIClient() (*userapi.APIClient, context.Context, context.CancelFunc) {
 	config := userapi.NewConfiguration()
 	config.Debug = global.Options.Debug
-
 	ctx, done := userapitools.NewAuthenticatedContext(global.Options.Token, global.Options.Timeout)
 	client := userapi.NewAPIClient(config)
 

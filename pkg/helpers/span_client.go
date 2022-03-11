@@ -15,7 +15,7 @@ func NewSpanAPIClient() (*spanapi.APIClient, context.Context, context.CancelFunc
 	config.Debug = global.Options.Debug
 	if global.Options.OverrideEndpoint != "" {
 		config.Servers = spanapi.ServerConfigurations{
-			spanapi.ServerConfiguration{URL: "http://127.0.0.1:8080/span"},
+			spanapi.ServerConfiguration{URL: global.Options.OverrideEndpoint},
 		}
 	}
 	ctx, done := apitools.ContextWithAuthAndTimeout(global.Options.Token, global.Options.Timeout)

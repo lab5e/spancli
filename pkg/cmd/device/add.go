@@ -10,8 +10,8 @@ import (
 type addDevice struct {
 	CollectionID     string   `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	Name             string   `long:"name" description:"device name"`
-	IMSI             string   `long:"imsi" description:"IMSI of device SIM" required:"yes"`
-	IMEI             string   `long:"imei" description:"IMEI of device" required:"yes"`
+	IMSI             string   `long:"imsi" description:"IMSI of device SIM"`
+	IMEI             string   `long:"imei" description:"IMEI of device"`
 	Tags             []string `long:"tag" description:"set tag value [name:value]"`
 	FirmwareTargetID string   `long:"firmware-target-id" description:"set the target firmware id"`
 }
@@ -21,14 +21,19 @@ func (r *addDevice) Execute([]string) error {
 	defer cancel()
 
 	device := spanapi.CreateDeviceRequest{
-		Imsi: &r.IMSI,
-		Imei: &r.IMEI,
 		Tags: helpers.TagMerge(&map[string]string{"name": r.Name}, r.Tags),
 		Firmware: &spanapi.FirmwareMetadata{
 			TargetFirmwareId: &r.FirmwareTargetID,
 		},
 	}
-
+	if r.IMEI != "" && r.IMSI != "" {
+		device.Config = &spanapi.DeviceConfig{
+			Ciot: &spanapi.CellularIoTConfig{
+				Imei: spanapi.PtrString(r.IMEI),
+				Imsi: spanapi.PtrString(r.IMSI),
+			},
+		}
+	}
 	dev, res, err := client.DevicesApi.CreateDevice(ctx, r.CollectionID).Body(device).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
