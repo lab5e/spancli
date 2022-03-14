@@ -8,6 +8,7 @@ import (
 	"github.com/lab5e/go-spanapi/v4/apitools"
 	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/global"
+	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 // watchInboxCmd connects to the MQTT service to monitor the inbox data
@@ -53,7 +54,7 @@ func (w *watchInboxCmd) printMessage(m spanapi.OutputDataMessage) {
 
 		fmt.Printf("%s\n", string(buf))
 	case "text":
-		fmt.Printf("%s\t%s\t%s\t%s\n", m.GetMessageId(), dateFormat(m.GetReceived(), false), m.GetTransport(), m.GetPayload())
+		fmt.Printf("%s\t%s\t%s\t%s\n", m.GetMessageId(), helpers.DateFormat(m.GetReceived(), false), m.GetTransport(), m.GetPayload())
 	default:
 		panic(fmt.Sprintf("Unknown format: %s", w.Format))
 	}

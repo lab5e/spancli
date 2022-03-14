@@ -1,10 +1,7 @@
 package inbox
 
 import (
-	"encoding/base64"
 	"fmt"
-	"strconv"
-	"time"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/lab5e/spancli/pkg/commonopt"
@@ -49,9 +46,9 @@ func (c *listInboxCmd) listDeviceInbox() error {
 	for _, item := range list.GetMessages() {
 		t.AppendRow(table.Row{
 			item.GetMessageId(),
-			dateFormat(item.GetReceived(), c.Format.NumericDate),
+			helpers.DateFormat(item.GetReceived(), c.Format.NumericDate),
 			item.GetTransport(),
-			helpers.EllipsisString(payloadFormat(item.GetPayload(), c.List.Decode), c.Format.MaxPayloadWdith),
+			helpers.EllipsisString(helpers.PayloadFormat(item.GetPayload(), c.List.Decode), c.Format.MaxPayloadWdith),
 		})
 	}
 	helpers.RenderTable(t, c.Format.Format)
@@ -84,33 +81,11 @@ func (c *listInboxCmd) listCollectionData() error {
 		t.AppendRow(table.Row{
 			item.GetMessageId(),
 			*item.GetDevice().DeviceId,
-			dateFormat(item.GetReceived(), c.Format.NumericDate),
+			helpers.DateFormat(item.GetReceived(), c.Format.NumericDate),
 			item.GetTransport(),
-			helpers.EllipsisString(payloadFormat(item.GetPayload(), c.List.Decode), c.Format.MaxPayloadWdith),
+			helpers.EllipsisString(helpers.PayloadFormat(item.GetPayload(), c.List.Decode), c.Format.MaxPayloadWdith),
 		})
 	}
 	helpers.RenderTable(t, c.Format.Format)
 	return nil
-}
-
-func dateFormat(dateStr string, numeric bool) string {
-	if numeric {
-		return dateStr
-	}
-
-	val, err := strconv.ParseInt(dateStr, 10, 64)
-	if err == nil {
-		return time.UnixMilli(val).Format(time.RFC3339)
-	}
-	return "(error)"
-}
-func payloadFormat(pl string, decode bool) string {
-	if decode {
-		ret, err := base64.StdEncoding.DecodeString(pl)
-		if err != nil {
-			return "(error)"
-		}
-		return string(ret)
-	}
-	return pl
 }

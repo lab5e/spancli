@@ -14,7 +14,7 @@ func (*Command) Execute([]string) error {
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
-	info, _, err := client.SystemApi.GetSystemInfo(ctx).Execute()
+	info, _, err := client.SpanApi.GetSystemInfo(ctx).Execute()
 	if err != nil {
 		return err
 	}

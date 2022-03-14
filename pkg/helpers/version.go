@@ -16,7 +16,7 @@ const ExpectedVersion = "4.1.16"
 // CheckVersion checks the server version of the Span API and emits a warning
 // if there's a version mismatch.
 func CheckVersion(ctx context.Context, client *spanapi.APIClient) {
-	info, _, err := client.SystemApi.GetSystemInfo(ctx).Execute()
+	info, _, err := client.SpanApi.GetSystemInfo(ctx).Execute()
 	if err != nil {
 		fmt.Printf("Error checking version: %v\n", err)
 		return
