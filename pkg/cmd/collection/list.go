@@ -5,14 +5,12 @@ import (
 	"fmt"
 
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type listCollection struct {
-	//lint:ignore SA5008 Multiple choice tags makes the linter unhappy
-	Format   string `long:"format" default:"text" description:"which output format to use" choice:"csv" choice:"html" choice:"markdown" choice:"text" choice:"json"`
-	NoColor  bool   `long:"no-color" env:"SPAN_NO_COLOR" description:"turn off coloring"`
-	PageSize int    `long:"page-size" description:"if set, chop output into pages of page-size length"`
+	Format commonopt.ListFormat
 }
 
 func (r *listCollection) Execute([]string) error {
@@ -29,7 +27,7 @@ func (r *listCollection) Execute([]string) error {
 		return nil
 	}
 
-	if r.Format == "json" {
+	if r.Format.Format == "json" {
 		json, err := json.MarshalIndent(collections, "", "  ")
 		if err != nil {
 			return err
@@ -38,13 +36,13 @@ func (r *listCollection) Execute([]string) error {
 		return nil
 	}
 
-	t := helpers.NewTableOutput(r.Format, r.NoColor, r.PageSize)
+	t := helpers.NewTableOutput(r.Format)
 	t.SetTitle("Collections")
 	t.AppendHeader(table.Row{"ID", "Name", "TeamID"})
 	for _, col := range collections.Collections {
 		// only truncate name if we output as 'text'
 		name := col.GetTags()["name"]
-		if r.Format == "text" {
+		if r.Format.Format == "text" {
 			name = helpers.EllipsisString(name, 25)
 		}
 
@@ -54,6 +52,6 @@ func (r *listCollection) Execute([]string) error {
 			*col.TeamId,
 		})
 	}
-	helpers.RenderTable(t, r.Format)
+	helpers.RenderTable(t, r.Format.Format)
 	return nil
 }

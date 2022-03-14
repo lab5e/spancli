@@ -5,15 +5,14 @@ import (
 	"fmt"
 
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type listMembers struct {
-	//lint:ignore SA5008 Linter is unhappy with multiple choice values
-	Format   string `long:"format" default:"text" description:"which output format to use" choice:"csv" choice:"html" choice:"markdown" choice:"text" choice:"json"`
-	TeamID   string `long:"team-id" description:"id of team" required:"yes"`
-	NoColor  bool   `long:"no-color" env:"SPAN_NO_COLOR" description:"turn off coloring"`
-	PageSize int    `long:"page-size" description:"if set, chop output into pages of page-size length"`
+	TeamID string `long:"team-id" description:"id of team" required:"yes"`
+
+	Format commonopt.ListFormat
 }
 
 func (r *listMembers) Execute([]string) error {
@@ -25,7 +24,7 @@ func (r *listMembers) Execute([]string) error {
 		return helpers.ApiError(res, err)
 	}
 
-	if r.Format == "json" {
+	if r.Format.Format == "json" {
 		json, err := json.MarshalIndent(team.Members, "", "  ")
 		if err != nil {
 			return err
@@ -34,13 +33,13 @@ func (r *listMembers) Execute([]string) error {
 		return nil
 	}
 
-	t := helpers.NewTableOutput(r.Format, r.NoColor, r.PageSize)
+	t := helpers.NewTableOutput(r.Format)
 	t.SetTitle("Members of " + r.TeamID)
 	t.AppendHeader(table.Row{"UserID", "Role", "Email"})
 
 	for _, member := range *team.Members {
 		t.AppendRow(table.Row{*member.UserId, *member.Role, *member.User.Email})
 	}
-	helpers.RenderTable(t, r.Format)
+	helpers.RenderTable(t, r.Format.Format)
 	return nil
 }

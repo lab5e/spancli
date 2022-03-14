@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type listInvite struct {
-	TeamID   string `long:"team-id" description:"id of team we wish to list invites for" required:"yes"`
-	Format   string `long:"format" default:"text" description:"which output format to use" choice:"csv" choice:"html" choice:"markdown" choice:"text" choice:"json"`
-	NoColor  bool   `long:"no-color" env:"SPAN_NO_COLOR" description:"turn off coloring"`
-	PageSize int    `long:"page-size" description:"if set, chop output into pages of page-size length"`
+	TeamID string `long:"team-id" description:"id of team we wish to list invites for" required:"yes"`
+
+	Format commonopt.ListFormat
 }
 
 func (r *listInvite) Execute([]string) error {
@@ -24,7 +24,7 @@ func (r *listInvite) Execute([]string) error {
 		return helpers.ApiError(res, err)
 	}
 
-	if r.Format == "json" {
+	if r.Format.Format == "json" {
 		json, err := json.MarshalIndent(invites, "", "  ")
 		if err != nil {
 			return err
@@ -40,14 +40,14 @@ func (r *listInvite) Execute([]string) error {
 		return nil
 	}
 
-	t := helpers.NewTableOutput(r.Format, r.NoColor, r.PageSize)
+	t := helpers.NewTableOutput(r.Format)
 	t.SetTitle("Invites for team " + r.TeamID)
 	t.AppendHeader(table.Row{"Code", "Created"})
 	for _, invite := range *invites.Invites {
 		createdAt := helpers.LocalTimeFormat(*invite.CreatedAt)
 		t.AppendRow(table.Row{*invite.Code, createdAt})
 	}
-	helpers.RenderTable(t, r.Format)
+	helpers.RenderTable(t, r.Format.Format)
 
 	return nil
 }

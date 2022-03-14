@@ -6,6 +6,7 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/lab5e/spancli/pkg/commonopt"
 )
 
 // SpanCLIStyle is the table style
@@ -35,16 +36,16 @@ var spanCLIStyle = table.Style{
 }
 
 // NewTableOutput creates a new table writer with the specified settings
-func NewTableOutput(format string, no_color bool, pagesize int) table.Writer {
+func NewTableOutput(format commonopt.ListFormat) table.Writer {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 
-	if !no_color {
+	if !format.NoColor {
 		t.SetStyle(spanCLIStyle)
 	}
 
-	if pagesize != 0 {
-		t.SetPageSize(pagesize)
+	if format.PageSize != 0 {
+		t.SetPageSize(format.PageSize)
 	}
 
 	return t
