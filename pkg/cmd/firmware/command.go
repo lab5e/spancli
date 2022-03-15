@@ -6,4 +6,5 @@ type Command struct {
 	Update  updateFirmware  `command:"update" description:"update firmware image"`
 	Delete  deleteFirmware  `command:"delete" description:"delete firmware image"`
 	Monitor monitorFirmware `command:"monitor" alias:"mon" description:"monitor firmware update status"`
+	Reset   resetError      `command:"clear" description:"clear firmware errors on device"`
 }
