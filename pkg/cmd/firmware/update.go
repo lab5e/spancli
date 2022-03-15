@@ -12,7 +12,7 @@ type updateFirmware struct {
 	ID              commonopt.Collection
 	Tags            commonopt.Tags
 	Version         string `long:"version" description:"version number for firmware"`
-	ImageID         string `long:"image-id" description:"firmware image id"`
+	ImageID         string `long:"image-id" description:"firmware image id" required:"yes"`
 	NewCollectionID string `long:"new-collection-id" description:"new collection id for image"`
 }
 
