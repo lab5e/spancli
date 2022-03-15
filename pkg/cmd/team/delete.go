@@ -3,19 +3,18 @@ package team
 import (
 	"fmt"
 
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type deleteTeam struct {
-	TeamID     string `long:"team-id" description:"id of team we wish to delete" required:"yes"`
-	YesIAmSure bool   `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
+	TeamID string `long:"team-id" description:"id of team we wish to delete" required:"yes"`
+	Prompt commonopt.NoPrompt
 }
 
 func (r *deleteTeam) Execute([]string) error {
-	if !r.YesIAmSure {
-		if !helpers.VerifyDeleteIntent() {
-			return fmt.Errorf("user aborted delete")
-		}
+	if !r.Prompt.Check() {
+		return fmt.Errorf("user aborted delete")
 	}
 
 	client, ctx, cancel := helpers.NewUserAPIClient()

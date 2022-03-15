@@ -3,26 +3,24 @@ package device
 import (
 	"fmt"
 
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type deleteDevice struct {
-	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
-	YesIAmSure   bool   `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
+	ID     commonopt.CollectionAndDevice
+	Prompt commonopt.NoPrompt
 }
 
 func (r *deleteDevice) Execute([]string) error {
-	if !r.YesIAmSure {
-		if !helpers.VerifyDeleteIntent() {
-			return fmt.Errorf("user aborted delete")
-		}
+	if !r.Prompt.Check() {
+		return fmt.Errorf("user aborted delete")
 	}
 
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
-	device, res, err := client.DevicesApi.DeleteDevice(ctx, r.CollectionID, r.DeviceID).Execute()
+	device, res, err := client.DevicesApi.DeleteDevice(ctx, r.ID.CollectionID, r.ID.DeviceID).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
 	}

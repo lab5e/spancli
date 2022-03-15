@@ -3,25 +3,24 @@ package collection
 import (
 	"fmt"
 
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type deleteCollection struct {
-	CollectionID string `long:"collection-id" description:"Span collection ID" required:"yes"`
-	YesIAmSure   bool   `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
+	ID     commonopt.Collection
+	Prompt commonopt.NoPrompt
 }
 
 func (r *deleteCollection) Execute([]string) error {
-	if !r.YesIAmSure {
-		if !helpers.VerifyDeleteIntent() {
-			return fmt.Errorf("user aborted delete")
-		}
+	if !r.Prompt.Check() {
+		return fmt.Errorf("user aborted delete")
 	}
 
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
-	col, res, err := client.CollectionsApi.DeleteCollection(ctx, r.CollectionID).Execute()
+	col, res, err := client.CollectionsApi.DeleteCollection(ctx, r.ID.CollectionID).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
 	}
