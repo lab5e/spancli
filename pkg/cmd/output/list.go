@@ -12,7 +12,6 @@ import (
 
 type listOutput struct {
 	ID     commonopt.Collection
-	List   commonopt.ListOptions
 	Format commonopt.ListFormat
 }
 
