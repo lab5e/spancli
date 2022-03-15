@@ -7,4 +7,5 @@ type Command struct {
 	Update     updateOutput `command:"update" description:"update output"`
 	Logs       outputLogs   `command:"logs" description:"show output logs"`
 	Delete     deleteOutput `command:"delete" description:"delete output"`
+	Status     outputStatus `command:"status" description:"show status"`
 }
