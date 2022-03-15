@@ -39,7 +39,7 @@ func (r *listDevices) Execute([]string) error {
 
 	t := helpers.NewTableOutput(r.Format)
 	t.SetTitle("Devices in %s", r.ID.CollectionID)
-	t.AppendHeader(table.Row{"DeviceID", "Name", "Last conn", "FW", "IMSI", "IMEI"})
+	t.AppendHeader(table.Row{"DeviceID", "Name", "Last conn", "FW", "IMSI", "IMEI", "Tags"})
 
 	for _, device := range resp.Devices {
 		// only truncate name if we output as 'text'
@@ -59,12 +59,13 @@ func (r *listDevices) Execute([]string) error {
 		}
 
 		t.AppendRow(table.Row{
-			*device.DeviceId,
+			device.GetDeviceId(),
 			name,
 			allocatedAt,
 			fwVersion,
-			*device.Imsi,
-			*device.Imei,
+			device.GetImsi(),
+			device.GetImei(),
+			helpers.TagsToString(device.GetTags()),
 		})
 	}
 	helpers.RenderTable(t, r.Format.Format)

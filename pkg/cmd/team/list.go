@@ -33,7 +33,7 @@ func (r *listTeams) Execute([]string) error {
 
 	t := helpers.NewTableOutput(r.Format)
 	t.SetTitle("Teams")
-	t.AppendHeader(table.Row{"ID", "Name"})
+	t.AppendHeader(table.Row{"ID", "Name", "Tags"})
 
 	for _, team := range *teamList.Teams {
 		// only truncate name if we output as 'text'
@@ -46,7 +46,11 @@ func (r *listTeams) Execute([]string) error {
 			name += " [P]"
 		}
 
-		t.AppendRow(table.Row{*team.TeamId, name})
+		t.AppendRow(table.Row{
+			team.GetTeamId(),
+			name,
+			helpers.TagsToString(team.GetTags()),
+		})
 	}
 	helpers.RenderTable(t, r.Format.Format)
 

@@ -30,6 +30,7 @@ func (c *listFirmware) Execute([]string) error {
 		"Version",
 		"Filename",
 		"Length",
+		"Tags",
 	})
 	for _, fw := range list.Images {
 		t.AppendRow(table.Row{
@@ -38,6 +39,7 @@ func (c *listFirmware) Execute([]string) error {
 			fw.GetVersion(),
 			fw.GetFilename(),
 			fw.GetLength(),
+			helpers.TagsToString(fw.GetTags()),
 		})
 	}
 	t.AppendFooter(table.Row{fmt.Sprintf("%d image(s)", len(list.Images))})

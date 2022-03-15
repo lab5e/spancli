@@ -38,7 +38,7 @@ func (r *listCollection) Execute([]string) error {
 
 	t := helpers.NewTableOutput(r.Format)
 	t.SetTitle("Collections")
-	t.AppendHeader(table.Row{"ID", "Name", "TeamID"})
+	t.AppendHeader(table.Row{"ID", "Name", "TeamID", "Tags"})
 	for _, col := range collections.Collections {
 		// only truncate name if we output as 'text'
 		name := col.GetTags()["name"]
@@ -47,9 +47,10 @@ func (r *listCollection) Execute([]string) error {
 		}
 
 		t.AppendRow(table.Row{
-			*col.CollectionId,
+			col.GetCollectionId(),
 			name,
-			*col.TeamId,
+			col.GetTeamId(),
+			helpers.TagsToString(col.GetTags()),
 		})
 	}
 	helpers.RenderTable(t, r.Format.Format)
