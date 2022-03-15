@@ -24,6 +24,10 @@ func (c *addOutput) Execute([]string) error {
 		return fmt.Errorf("invalid json configuration: %v", err)
 	}
 
+	if c.Type.Type == "" {
+		return fmt.Errorf("must specify output type")
+	}
+
 	ot := spanapi.OutputType(c.Type.Type)
 	if !ot.IsValid() {
 		return fmt.Errorf("invalid output type: %s", c.Type.Type)
