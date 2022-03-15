@@ -1,6 +1,9 @@
 package output
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/lab5e/go-spanapi/v4"
 	"github.com/lab5e/spancli/pkg/commonopt"
@@ -23,6 +26,7 @@ func (c *listOutput) Execute([]string) error {
 	}
 
 	t := helpers.NewTableOutput(c.Format)
+	t.SetTitle("Outputs for collection %s", c.ID.CollectionID)
 	t.AppendHeader(table.Row{
 		"Output ID",
 		"Type",
@@ -35,7 +39,7 @@ func (c *listOutput) Execute([]string) error {
 			o.GetOutputId(),
 			o.GetType(),
 			o.GetEnabled(),
-			configToString(o.GetConfig()),
+			configToString(o.Config),
 			helpers.TagsToString(o.GetTags()),
 		})
 	}
@@ -43,6 +47,15 @@ func (c *listOutput) Execute([]string) error {
 	return nil
 }
 
-func configToString(cfg spanapi.OutputConfig) string {
-	return ""
+// Just convert the config to a single-line JSON string
+func configToString(cfg *spanapi.OutputConfig) string {
+	if cfg == nil {
+		return ""
+	}
+	jsonStr, err := json.Marshal(cfg)
+	if err != nil {
+		fmt.Printf("\nError marshaling config: %v\n", err)
+		return ""
+	}
+	return string(jsonStr)
 }
