@@ -4,42 +4,47 @@ import (
 	"fmt"
 
 	"github.com/lab5e/go-spanapi/v4"
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type updateDevice struct {
-	CollectionID     string   `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	NewCollectionID  string   `long:"new-collection-id" description:"Span collection ID you want to move device to"`
-	DeviceID         string   `long:"device-id" description:"device id" required:"yes"`
-	Name             string   `long:"name" description:"device name"`
-	IMSI             string   `long:"imsi" description:"IMSI of device SIM"`
-	IMEI             string   `long:"imei" description:"IMEI of device"`
-	Tags             []string `long:"tag" description:"set tag value [name:value]"`
-	FirmwareTargetID string   `long:"firmware-target-id" description:"set the target firmware id"`
+	ID               commonopt.CollectionAndDevice
+	NewCollectionID  string `long:"new-collection-id" description:"Span collection ID you want to move device to"`
+	Name             string `long:"name" description:"device name"`
+	IMSI             string `long:"imsi" description:"IMSI of device SIM"`
+	IMEI             string `long:"imei" description:"IMEI of device"`
+	Tags             commonopt.Tags
+	FirmwareTargetID string `long:"firmware-target-id" description:"set the target firmware id"`
 }
 
 func (r *updateDevice) Execute([]string) error {
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
-	device, res, err := client.DevicesApi.RetrieveDevice(ctx, r.CollectionID, r.DeviceID).Execute()
-	if err != nil {
-		return helpers.ApiError(res, err)
-	}
+	update := spanapi.UpdateDeviceRequest{}
 	if r.IMSI != "" {
-		device.SetImsi(r.IMSI)
+		update.Config = &spanapi.DeviceConfig{
+			Ciot: &spanapi.CellularIoTConfig{
+				Imsi: &r.IMSI,
+			},
+		}
 	}
 	if r.IMEI != "" {
-		device.SetImei(r.IMEI)
+		if update.Config == nil {
+			update.Config = &spanapi.DeviceConfig{}
+		}
+		if update.Config.Ciot == nil {
+			update.Config.Ciot = &spanapi.CellularIoTConfig{}
+		}
+		update.Config.Ciot.Imei = &r.IMEI
 	}
+	update.Tags = r.Tags.AsMap()
 	if r.Name != "" {
-		r.Tags = append(r.Tags, fmt.Sprintf(`name:"%s"`, r.Name))
+		m := *update.Tags
+		m["name"] = r.Name
+		update.Tags = &m
 	}
-	if r.FirmwareTargetID != "" {
-		device.Firmware.SetTargetFirmwareId(r.FirmwareTargetID)
-	}
-
-	update := spanapi.UpdateDeviceRequest{}
 
 	if r.NewCollectionID != "" {
 		update.CollectionId = spanapi.PtrString(r.NewCollectionID)
@@ -51,7 +56,7 @@ func (r *updateDevice) Execute([]string) error {
 		}
 	}
 
-	deviceUpdated, res, err := client.DevicesApi.UpdateDevice(ctx, r.CollectionID, r.DeviceID).Body(update).Execute()
+	deviceUpdated, res, err := client.DevicesApi.UpdateDevice(ctx, r.ID.CollectionID, r.ID.DeviceID).Body(update).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
 	}

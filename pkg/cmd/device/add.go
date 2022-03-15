@@ -9,7 +9,7 @@ import (
 )
 
 type addDevice struct {
-	CollectionID     string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	ID               commonopt.Collection
 	IMSI             string `long:"imsi" description:"IMSI of device SIM"`
 	IMEI             string `long:"imei" description:"IMEI of device"`
 	Tags             commonopt.Tags
@@ -34,7 +34,7 @@ func (r *addDevice) Execute([]string) error {
 			},
 		}
 	}
-	dev, res, err := client.DevicesApi.CreateDevice(ctx, r.CollectionID).Body(device).Execute()
+	dev, res, err := client.DevicesApi.CreateDevice(ctx, r.ID.CollectionID).Body(device).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
 	}

@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type getDevice struct {
-	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	DeviceID     string `long:"device-id" description:"device id" required:"yes"`
+	ID commonopt.CollectionAndDevice
 }
 
 func (r *getDevice) Execute([]string) error {
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
-	device, res, err := client.DevicesApi.RetrieveDevice(ctx, r.CollectionID, r.DeviceID).Execute()
+	device, res, err := client.DevicesApi.RetrieveDevice(ctx, r.ID.CollectionID, r.ID.DeviceID).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
 	}

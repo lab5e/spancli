@@ -10,15 +10,15 @@ import (
 )
 
 type listDevices struct {
-	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	Format       commonopt.ListFormat
+	ID     commonopt.Collection
+	Format commonopt.ListFormat
 }
 
 func (r *listDevices) Execute([]string) error {
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
-	resp, res, err := client.DevicesApi.ListDevices(ctx, r.CollectionID).Execute()
+	resp, res, err := client.DevicesApi.ListDevices(ctx, r.ID.CollectionID).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
 	}
@@ -38,7 +38,7 @@ func (r *listDevices) Execute([]string) error {
 	}
 
 	t := helpers.NewTableOutput(r.Format)
-	t.SetTitle("Devices in %s", r.CollectionID)
+	t.SetTitle("Devices in %s", r.ID.CollectionID)
 	t.AppendHeader(table.Row{"DeviceID", "Name", "Last conn", "FW", "IMSI", "IMEI"})
 
 	for _, device := range resp.Devices {
