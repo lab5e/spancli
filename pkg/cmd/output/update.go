@@ -15,10 +15,13 @@ type updateOutput struct {
 	OID             oid
 	Config          string `long:"config" description:"json configuration for output"`
 	Tags            commonopt.Tags
+	Enable          bool `long:"enable" description:"enable output"`
+	Disable         bool `long:"disable" description:"disable output"`
 	Type            otp
 }
 
 func (c *updateOutput) Execute([]string) error {
+	//Ensure configuration is valid JSON first
 
 	client, ctx, done := helpers.NewSpanAPIClient()
 	defer done()
@@ -44,7 +47,12 @@ func (c *updateOutput) Execute([]string) error {
 	if c.NewCollectionID != "" {
 		updateRequest.CollectionId = spanapi.PtrString(c.NewCollectionID)
 	}
-
+	if c.Enable {
+		updateRequest.Enabled = spanapi.PtrBool(true)
+	}
+	if c.Disable {
+		updateRequest.Enabled = spanapi.PtrBool(false)
+	}
 	o, res, err := client.OutputsApi.UpdateOutput(ctx, c.ID.CollectionID, c.OID.OutputID).Body(updateRequest).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
