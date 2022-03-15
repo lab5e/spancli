@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/lab5e/go-spanapi/v4"
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type addCollection struct {
-	TeamID string   `long:"team-id" description:"team the collection belongs to" required:"yes"`
-	Tags   []string `long:"tag" description:"Set tag value (name:value)"`
-	Name   string   `long:"name" description:"name of the collection"`
+	TeamID string `long:"team-id" description:"team the collection belongs to" required:"yes"`
+	Tags   commonopt.Tags
+	Name   string `long:"name" description:"name of the collection"`
 }
 
 func (r *addCollection) Execute([]string) error {
@@ -19,7 +20,7 @@ func (r *addCollection) Execute([]string) error {
 
 	collection := spanapi.CreateCollectionRequest{
 		TeamId: &r.TeamID,
-		Tags:   helpers.TagMerge(nil, r.Tags),
+		Tags:   r.Tags.AsMap(),
 	}
 
 	if r.Name != "" {

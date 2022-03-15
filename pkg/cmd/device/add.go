@@ -4,16 +4,16 @@ import (
 	"fmt"
 
 	"github.com/lab5e/go-spanapi/v4"
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type addDevice struct {
-	CollectionID     string   `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	Name             string   `long:"name" description:"device name"`
-	IMSI             string   `long:"imsi" description:"IMSI of device SIM"`
-	IMEI             string   `long:"imei" description:"IMEI of device"`
-	Tags             []string `long:"tag" description:"set tag value [name:value]"`
-	FirmwareTargetID string   `long:"firmware-target-id" description:"set the target firmware id"`
+	CollectionID     string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
+	IMSI             string `long:"imsi" description:"IMSI of device SIM"`
+	IMEI             string `long:"imei" description:"IMEI of device"`
+	Tags             commonopt.Tags
+	FirmwareTargetID string `long:"firmware-target-id" description:"set the target firmware id"`
 }
 
 func (r *addDevice) Execute([]string) error {
@@ -21,7 +21,7 @@ func (r *addDevice) Execute([]string) error {
 	defer cancel()
 
 	device := spanapi.CreateDeviceRequest{
-		Tags: helpers.TagMerge(&map[string]string{"name": r.Name}, r.Tags),
+		Tags: r.Tags.AsMap(),
 		Firmware: &spanapi.FirmwareMetadata{
 			TargetFirmwareId: &r.FirmwareTargetID,
 		},

@@ -1,4 +1,4 @@
-package helpers
+package commonopt
 
 import (
 	"strings"
@@ -44,22 +44,12 @@ func TestTagRegex(t *testing.T) {
 }
 
 func TestMetaToMap(t *testing.T) {
-	mm := TagMerge(nil, parms)
+	tt := Tags{Tags: parms}
+	mm := tt.AsMap()
+
 	assert.Len(t, *mm, 6)
 	assert.Equal(t, (*mm)["foo"], "bar baz")
 	assert.Equal(t, (*mm)["fooBar"], "bar")
 	assert.Equal(t, (*mm)["foo-bar"], "baz")
 	assert.Equal(t, (*mm)["foo_bar"], "baz")
-}
-
-func TestMetaMerge(t *testing.T) {
-	m := TagMerge(meta, parms)
-	assert.Len(t, *m, 7)
-	assert.Contains(t, *m, "foo")
-	assert.Contains(t, *m, "foo-bar")
-	assert.Contains(t, *m, "fooBar")
-	assert.Contains(t, *m, "foo_bar")
-	assert.Contains(t, *m, "untouched")
-	assert.Contains(t, *m, "existing")
-	assert.Contains(t, *m, "otherexisting")
 }

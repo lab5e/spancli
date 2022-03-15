@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/lab5e/go-spanapi/v4"
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type updateCollection struct {
-	CollectionID string   `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
-	Tags         []string `long:"tag" description:"Set tag value (name:value)"`
+	ID   commonopt.Collection
+	Tags commonopt.Tags
 	//lint:ignore SA5008 Multiple choice tags makes the linter unhappy
 	Management       string `long:"firmware-management" description:"firmware management setting" choice:"disabled" choice:"device" choice:"collection"`
 	FirmwareTargetID string `long:"firmware-target-id" description:"set the target firmware id"`
@@ -20,7 +21,7 @@ func (u *updateCollection) Execute([]string) error {
 	defer cancel()
 
 	update := spanapi.UpdateCollectionRequest{
-		Tags: helpers.TagMerge(nil, u.Tags),
+		Tags: u.Tags.AsMap(),
 	}
 	if u.Management != "" {
 		if update.Firmware == nil {
@@ -43,7 +44,7 @@ func (u *updateCollection) Execute([]string) error {
 		}
 		update.Firmware.TargetFirmwareId = spanapi.PtrString(u.FirmwareTargetID)
 	}
-	collectionUpdated, res, err := client.CollectionsApi.UpdateCollection(ctx, u.CollectionID).Body(update).Execute()
+	collectionUpdated, res, err := client.CollectionsApi.UpdateCollection(ctx, u.ID.CollectionID).Body(update).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
 	}
