@@ -38,19 +38,27 @@ func (r *listCollection) Execute([]string) error {
 
 	t := helpers.NewTableOutput(r.Format)
 	t.SetTitle("Collections")
-	t.AppendHeader(table.Row{"ID", "Name", "TeamID", "Tags"})
+	t.AppendHeader(table.Row{
+		"ID",
+		"Name",
+		"Firmware",
+		"Target Image",
+		"Tags",
+		"TeamID",
+	})
 	for _, col := range collections.Collections {
 		// only truncate name if we output as 'text'
 		name := col.GetTags()["name"]
 		if r.Format.Format == "text" {
 			name = helpers.EllipsisString(name, 25)
 		}
-
 		t.AppendRow(table.Row{
 			col.GetCollectionId(),
 			name,
-			col.GetTeamId(),
+			col.Firmware.GetManagement(),
+			col.Firmware.GetTargetFirmwareId(),
 			helpers.TagsToString(col.GetTags()),
+			col.GetTeamId(),
 		})
 	}
 	helpers.RenderTable(t, r.Format.Format)
