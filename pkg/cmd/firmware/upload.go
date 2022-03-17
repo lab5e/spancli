@@ -13,8 +13,8 @@ import (
 
 type uploadFirmware struct {
 	ID        commonopt.Collection
-	ImageFile string `long:"image" description:"firmware image binary"`
-	Version   string `long:"version" description:"firmware image version" default:"1.0.0"`
+	ImageFile string `long:"image" description:"firmware image binary" required:"yes"`
+	Version   string `long:"version" description:"firmware image version" default:"1.0.0" required:"yes"`
 }
 
 func (c *uploadFirmware) Execute([]string) error {

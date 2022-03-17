@@ -1,7 +1,6 @@
 package device
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -27,17 +26,10 @@ func (r *getDevice) Execute([]string) error {
 	t.SetTitle("Device %s", device.GetDeviceId())
 
 	t.AppendHeader(table.Row{"Field", "Value"})
-	// Dump as name.value list by converting to JSON and then back to map[string]any
-	buf, err := json.Marshal(device)
-	if err != nil {
-		return err
-	}
 
-	nameValue := map[string]any{}
-	if err := json.Unmarshal(buf, &nameValue); err != nil {
+	if err := helpers.DumpToTable(t, device); err != nil {
 		return err
 	}
-	dumpFields(t, "", nameValue)
 
 	certs, res, err := client.DevicesApi.DeviceCertificate(ctx, r.ID.CollectionID, r.ID.DeviceID).Execute()
 	if err != nil {
@@ -57,25 +49,4 @@ func (r *getDevice) Execute([]string) error {
 	}
 	helpers.RenderTable(t, r.Format.Format)
 	return nil
-}
-
-func fieldName(prefix string, field string) string {
-	if prefix == "" {
-		return field
-	}
-	return prefix + "." + field
-}
-
-func dumpFields(t table.Writer, prefix string, nameValue map[string]any) {
-	for k, v := range nameValue {
-		subType, ok := v.(map[string]any)
-		if ok {
-			dumpFields(t, fieldName(prefix, k), subType)
-			continue
-		}
-		t.AppendRow(table.Row{
-			fieldName(prefix, k),
-			v,
-		})
-	}
 }

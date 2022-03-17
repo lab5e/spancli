@@ -1,30 +1,35 @@
 package collection
 
 import (
-	"encoding/json"
-	"fmt"
-
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/lab5e/spancli/pkg/commonopt"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
 type getCollection struct {
-	CollectionID string `long:"collection-id" description:"Span collection ID" required:"yes"`
+	ID     commonopt.Collection
+	Format commonopt.ListFormat
 }
 
 func (r *getCollection) Execute([]string) error {
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
-	col, res, err := client.CollectionsApi.RetrieveCollection(ctx, r.CollectionID).Execute()
+	col, res, err := client.CollectionsApi.RetrieveCollection(ctx, r.ID.CollectionID).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
 	}
 
-	jsonData, err := json.MarshalIndent(col, "", "  ")
-	if err != nil {
+	t := helpers.NewTableOutput(r.Format)
+
+	t.SetTitle("Collection %s", r.ID.CollectionID)
+
+	t.AppendHeader(table.Row{"Field", "Value"})
+
+	if err := helpers.DumpToTable(t, col); err != nil {
 		return err
 	}
 
-	fmt.Println(string(jsonData))
+	helpers.RenderTable(t, r.Format.Format)
 	return nil
 }
