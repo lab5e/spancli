@@ -9,9 +9,8 @@ import (
 )
 
 type addCollection struct {
-	TeamID string `long:"team-id" description:"team the collection belongs to" required:"yes"`
+	TeamID string `long:"team-id" description:"team the collection belongs to"`
 	Tags   commonopt.Tags
-	Name   string `long:"name" description:"name of the collection"`
 }
 
 func (r *addCollection) Execute([]string) error {
@@ -19,12 +18,12 @@ func (r *addCollection) Execute([]string) error {
 	defer cancel()
 
 	collection := spanapi.CreateCollectionRequest{
-		TeamId: &r.TeamID,
-		Tags:   r.Tags.AsMap(),
+		Tags: r.Tags.AsMap(),
 	}
+	// Team ID is optional; the private team will be used if omitted
 
-	if r.Name != "" {
-		(*collection.Tags)["name"] = r.Name
+	if r.TeamID != "" {
+		collection.TeamId = &r.TeamID
 	}
 
 	col, res, err := client.CollectionsApi.CreateCollection(ctx).Body(collection).Execute()
