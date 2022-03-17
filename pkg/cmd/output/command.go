@@ -8,4 +8,5 @@ type Command struct {
 	Logs       outputLogs   `command:"logs" description:"show output logs"`
 	Delete     deleteOutput `command:"delete" description:"delete output"`
 	Status     outputStatus `command:"status" description:"show status"`
+	Get        getOutput    `command:"get" description:"get output details"`
 }
