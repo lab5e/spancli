@@ -1,6 +1,6 @@
 package inbox
 
 type Command struct {
-	List  listInboxCmd  `command:"list" description:"list contents of inbox"`
-	Watch watchInboxCmd `command:"watch" description:"watch contents of inbox"`
+	List  listInboxCmd  `command:"list" alias:"ls" description:"list contents of inbox"`
+	Watch watchInboxCmd `command:"watch" alias:"w" description:"watch contents of inbox"`
 }
