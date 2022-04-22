@@ -32,7 +32,7 @@ func (r *addCollection) Execute([]string) error {
 		return helpers.ApiError(res, err)
 	}
 	if r.Eval {
-		fmt.Printf("SPAN_COLLECTION_ID=%s\n", col.GetCollectionId())
+		fmt.Printf("export SPAN_COLLECTION_ID=%s\n", col.GetCollectionId())
 		return nil
 	}
 	fmt.Printf("created collection %s\n", col.GetCollectionId())

@@ -40,7 +40,7 @@ func (r *addDevice) Execute([]string) error {
 		return helpers.ApiError(res, err)
 	}
 	if r.Eval {
-		fmt.Printf("SPAN_DEVICE_ID=%s\n", dev.GetDeviceId())
+		fmt.Printf("export SPAN_DEVICE_ID=%s\n", dev.GetDeviceId())
 		return nil
 	}
 	fmt.Printf("created device %s\n", dev.GetDeviceId())
