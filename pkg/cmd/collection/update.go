@@ -49,7 +49,7 @@ func (u *updateCollection) Execute([]string) error {
 		}
 		id := ""
 		for _, fw := range list.Images {
-			if fw.Version == &u.FirmwareVersion {
+			if fw.GetVersion() == u.FirmwareVersion {
 				id = fw.GetImageId()
 				break
 			}
