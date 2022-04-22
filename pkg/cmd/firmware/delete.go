@@ -9,7 +9,7 @@ import (
 
 type deleteFirmware struct {
 	ID      commonopt.Collection
-	ImageID string `long:"image-id" description:"firmware image id" required:"yes"`
+	ImageID string `long:"image-id" description:"firmware image id" required:"yes" env:"SPAN_IMAGE_ID"`
 	Prompt  commonopt.NoPrompt
 }
 
