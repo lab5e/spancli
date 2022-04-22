@@ -16,7 +16,7 @@ import (
 // changes. Nothing fancy.
 type monitorFirmware struct {
 	ID      commonopt.Collection
-	ImageID string `long:"image-id" description:"firmware image id" required:"no"`
+	ImageID string `long:"image-id" description:"firmware image id" required:"no" env:"SPAN_IMAGE_ID"`
 }
 
 type deviceState struct {

@@ -13,6 +13,7 @@ type addDevice struct {
 	IMSI             string `long:"imsi" description:"IMSI of device SIM"`
 	IMEI             string `long:"imei" description:"IMEI of device"`
 	Tags             commonopt.Tags
+	Eval             bool   `long:"eval" description:"Output device ID as environment variable"`
 	FirmwareTargetID string `long:"firmware-target-id" description:"set the target firmware id"`
 }
 
@@ -38,7 +39,10 @@ func (r *addDevice) Execute([]string) error {
 	if err != nil {
 		return helpers.ApiError(res, err)
 	}
-
-	fmt.Printf("created device %s\n", *dev.DeviceId)
+	if r.Eval {
+		fmt.Printf("SPAN_DEVICE_ID=%s\n", dev.GetDeviceId())
+		return nil
+	}
+	fmt.Printf("created device %s\n", dev.GetDeviceId())
 	return nil
 }

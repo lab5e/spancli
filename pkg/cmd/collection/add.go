@@ -10,6 +10,7 @@ import (
 
 type addCollection struct {
 	TeamID string `long:"team-id" description:"team the collection belongs to"`
+	Eval   bool   `long:"eval" description:"Output collection ID as environment variable"`
 	Tags   commonopt.Tags
 }
 
@@ -29,6 +30,10 @@ func (r *addCollection) Execute([]string) error {
 	col, res, err := client.CollectionsApi.CreateCollection(ctx).Body(collection).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
+	}
+	if r.Eval {
+		fmt.Printf("SPAN_COLLECTION_ID=%s\n", col.GetCollectionId())
+		return nil
 	}
 	fmt.Printf("created collection %s\n", col.GetCollectionId())
 	return nil

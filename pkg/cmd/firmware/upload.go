@@ -15,6 +15,7 @@ type uploadFirmware struct {
 	ID        commonopt.Collection
 	ImageFile string `long:"image" description:"firmware image binary" required:"yes"`
 	Version   string `long:"version" description:"firmware image version" default:"1.0.0" required:"yes"`
+	Eval      bool   `long:"eval" description:"Output as environment variable"`
 }
 
 func (c *uploadFirmware) Execute([]string) error {
@@ -40,6 +41,10 @@ func (c *uploadFirmware) Execute([]string) error {
 	).Execute()
 	if err != nil {
 		return helpers.ApiError(res, err)
+	}
+	if c.Eval {
+		fmt.Printf("SPAN_IMAGE_ID=%s\n", fwimg.GetImageId())
+		return nil
 	}
 	fmt.Printf("Created firmware image with ID %s, SHA256 %s, version %s (%d bytes)\n", fwimg.GetImageId(), fwimg.GetSha256(), fwimg.GetVersion(), fwimg.GetLength())
 	return nil
