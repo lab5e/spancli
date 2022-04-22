@@ -1,6 +1,7 @@
 package collection
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/lab5e/go-spanapi/v4"
@@ -12,8 +13,8 @@ type updateCollection struct {
 	ID   commonopt.Collection
 	Tags commonopt.Tags
 	//lint:ignore SA5008 Multiple choice tags makes the linter unhappy
-	Management       string `long:"firmware-management" description:"firmware management setting" choice:"disabled" choice:"device" choice:"collection"`
-	FirmwareTargetID string `long:"firmware-target-id" description:"set the target firmware id"`
+	Management      string `long:"firmware-management" description:"firmware management setting" choice:"disabled" choice:"device" choice:"collection"`
+	FirmwareVersion string `long:"firmware-version" description:"set the target firmware version"`
 }
 
 func (u *updateCollection) Execute([]string) error {
@@ -38,11 +39,25 @@ func (u *updateCollection) Execute([]string) error {
 			update.Firmware.Management = spanapi.FIRMWAREMANAGEMENT_DISABLED.Ptr()
 		}
 	}
-	if u.FirmwareTargetID != "" {
+	if u.FirmwareVersion != "" {
 		if update.Firmware == nil {
 			update.Firmware = &spanapi.CollectionFirmware{}
 		}
-		update.Firmware.TargetFirmwareId = spanapi.PtrString(u.FirmwareTargetID)
+		list, res, err := client.FotaApi.ListFirmware(ctx, u.ID.CollectionID).Execute()
+		if err != nil {
+			return helpers.ApiError(res, err)
+		}
+		id := ""
+		for _, fw := range list.Images {
+			if fw.Version == &u.FirmwareVersion {
+				id = fw.GetImageId()
+				break
+			}
+		}
+		if id == "" {
+			return errors.New("unknown version")
+		}
+		update.Firmware.TargetFirmwareId = spanapi.PtrString(id)
 	}
 	collectionUpdated, res, err := client.CollectionsApi.UpdateCollection(ctx, u.ID.CollectionID).Body(update).Execute()
 	if err != nil {

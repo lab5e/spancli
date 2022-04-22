@@ -43,7 +43,7 @@ func (c *uploadFirmware) Execute([]string) error {
 		return helpers.ApiError(res, err)
 	}
 	if c.Eval {
-		fmt.Printf("SPAN_IMAGE_ID=%s\n", fwimg.GetImageId())
+		fmt.Printf("export SPAN_IMAGE_ID=%s\n", fwimg.GetImageId())
 		return nil
 	}
 	fmt.Printf("Created firmware image with ID %s, SHA256 %s, version %s (%d bytes)\n", fwimg.GetImageId(), fwimg.GetSha256(), fwimg.GetVersion(), fwimg.GetLength())

@@ -1,6 +1,7 @@
 package device
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/lab5e/go-spanapi/v4"
@@ -9,13 +10,13 @@ import (
 )
 
 type updateDevice struct {
-	ID               commonopt.CollectionAndDevice
-	NewCollectionID  string `long:"new-collection-id" description:"Span collection ID you want to move device to"`
-	Name             string `long:"name" description:"device name"`
-	IMSI             string `long:"imsi" description:"IMSI of device SIM"`
-	IMEI             string `long:"imei" description:"IMEI of device"`
-	Tags             commonopt.Tags
-	FirmwareTargetID string `long:"firmware-target-id" description:"set the target firmware id"`
+	ID              commonopt.CollectionAndDevice
+	NewCollectionID string `long:"new-collection-id" description:"Span collection ID you want to move device to"`
+	Name            string `long:"name" description:"device name"`
+	IMSI            string `long:"imsi" description:"IMSI of device SIM"`
+	IMEI            string `long:"imei" description:"IMEI of device"`
+	Tags            commonopt.Tags
+	FirmwareVersion string `long:"firmware-version" description:"set the target version for firmware"`
 }
 
 func (r *updateDevice) Execute([]string) error {
@@ -50,9 +51,23 @@ func (r *updateDevice) Execute([]string) error {
 		update.CollectionId = spanapi.PtrString(r.NewCollectionID)
 	}
 
-	if r.FirmwareTargetID != "" {
+	if r.FirmwareVersion != "" {
+		list, res, err := client.FotaApi.ListFirmware(ctx, r.ID.CollectionID).Execute()
+		if err != nil {
+			return helpers.ApiError(res, err)
+		}
+		id := ""
+		for _, fw := range list.Images {
+			if fw.GetVersion() == r.FirmwareVersion {
+				id = fw.GetImageId()
+				break
+			}
+		}
+		if id == "" {
+			return errors.New("unknown version")
+		}
 		update.Firmware = &spanapi.FirmwareMetadata{
-			TargetFirmwareId: spanapi.PtrString(r.FirmwareTargetID),
+			TargetFirmwareId: spanapi.PtrString(id),
 		}
 	}
 
