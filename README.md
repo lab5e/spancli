@@ -9,7 +9,7 @@ install of this command.
 
 You can install this utility by issuing the following command.
 
-    go get -u github.com/lab5e/spancli/cmd/span
+    go get github.com/lab5e/spancli/cmd/span@latest
 
 ## Usage
 
@@ -17,22 +17,10 @@ The general usage of `span` is
 
     span [options] <subcommand> [subcommand options]
 
-The subcommands are:
-
-    collection  collection management commands
-    data        list data from device or collection
-    device      device management commands
-    listen      listen for messages from Span
-    output      manage outputs
-
-*There is a ws subcommand right now as well, but this will go away in
-the future.*
-
 For more help please refer to the `-h` option:
 
     span -h
 	span <subcommand> -h
-
 
 ## Environment variables
 
@@ -71,7 +59,7 @@ In order to get tab completion you can add this to your
 
 ## Requirements
 
-This was written in Go 1.15, so you should have Go 1.15 or a newer
+This was written in Go 1.18, so you should have Go 1.18 or a newer
 version of Go installed.
 
 
