@@ -20,11 +20,11 @@ type watchInboxCmd struct {
 }
 
 func (w *watchInboxCmd) Execute([]string) error {
-	opts := make([]apitools.MQTTStreamOpt, 0)
+	opts := make([]apitools.MQTTOption, 0)
 	opts = append(opts, apitools.WithAPIToken(global.Options.Token))
 	opts = append(opts, apitools.WithCollectionID(w.ID.CollectionID))
 	if global.Options.OverrideEndpoint != "" {
-		opts = append(opts, apitools.WithEndpointOverride(global.Options.MQTTOverrideEndpoint))
+		opts = append(opts, apitools.WithBrokerOverride(global.Options.MQTTOverrideEndpoint))
 	}
 	stream, err := apitools.NewMQTTStream(opts...)
 	if err != nil {
