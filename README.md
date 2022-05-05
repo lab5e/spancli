@@ -1,7 +1,7 @@
 # Span command line client
 
 The Span command line client aims to be a convenient way to manage
-your [Span](https://span.lab5e.com/) resources.  This is a work in
+your [Span](https://console.lab5e.com/) resources.  This is a work in
 progress so it might be a good idea to check back and update your
 install of this command.
 
