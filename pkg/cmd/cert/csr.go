@@ -63,7 +63,7 @@ func (cc *csrCert) Execute([]string) error {
 			Csr:      spanapi.PtrString(base64.StdEncoding.EncodeToString(csrBytes)),
 		}).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Println("CSR request completed,")

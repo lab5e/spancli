@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// DateFormat formats a date to RFC3339 if the date formatting flag is set
 func DateFormat(dateStr string, numeric bool) string {
 	if numeric {
 		return dateStr

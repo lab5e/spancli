@@ -22,7 +22,7 @@ func (c *getFirmware) Execute([]string) error {
 	if c.Version != "" {
 		list, res, err := client.FotaApi.ListFirmware(ctx, c.ID.CollectionID).Execute()
 		if err != nil {
-			return helpers.ApiError(res, err)
+			return helpers.APIError(res, err)
 		}
 		for _, f := range list.Images {
 			if f.GetVersion() == c.Version {
@@ -36,7 +36,7 @@ func (c *getFirmware) Execute([]string) error {
 	}
 	fw, res, err := client.FotaApi.RetrieveFirmware(ctx, c.ID.CollectionID, c.ImageID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	return c.printFirmware(fw)

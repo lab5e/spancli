@@ -18,7 +18,7 @@ func (c *getOutput) Execute([]string) error {
 
 	fw, res, err := client.OutputsApi.RetrieveOutput(ctx, c.ID.CollectionID, c.OID.OutputID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	t := helpers.NewTableOutput(c.Format)

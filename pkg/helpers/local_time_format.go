@@ -15,6 +15,7 @@ func msSinceEpochToTime(ts string) (int64, time.Time) {
 	return r, time.Unix(0, r*int64(time.Millisecond))
 }
 
+// LocalTimeFormat formats a timestamp string into local time
 func LocalTimeFormat(ts string) string {
 	_, t := msSinceEpochToTime(ts)
 	return t.Local().Format(timeFmt)

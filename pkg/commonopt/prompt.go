@@ -10,10 +10,12 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 )
 
+// NoPrompt is a common "do not prompt me if I'm about to shoot myself in the foot"-option
 type NoPrompt struct {
 	YesIAmSure bool `long:"yes-i-am-sure" description:"disable prompt for 'are you sure'"`
 }
 
+// Check ensures the operator doesn't shoot him/herself in the foot by confirming f.e. deletes
 func (p *NoPrompt) Check() bool {
 	if !p.YesIAmSure {
 		rand.Seed(time.Now().UnixNano())

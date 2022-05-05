@@ -17,7 +17,7 @@ func (c *resetError) Execute([]string) error {
 
 	_, res, err := client.FotaApi.ClearFirmwareError(ctx, c.ID.CollectionID, c.ID.DeviceID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("Firmware errors on device %s in collection %s cleared\n", c.ID.CollectionID, c.ID.DeviceID)

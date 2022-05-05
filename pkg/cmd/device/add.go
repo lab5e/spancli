@@ -37,7 +37,7 @@ func (r *addDevice) Execute([]string) error {
 	}
 	dev, res, err := client.DevicesApi.CreateDevice(ctx, r.ID.CollectionID).Body(device).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 	if r.Eval {
 		fmt.Printf("export SPAN_DEVICE_ID=%s\n", dev.GetDeviceId())

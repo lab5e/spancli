@@ -22,7 +22,7 @@ func (r *deleteDevice) Execute([]string) error {
 
 	device, res, err := client.DevicesApi.DeleteDevice(ctx, r.ID.CollectionID, r.ID.DeviceID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("deleted device %s in collection %s\n", *device.DeviceId, *device.CollectionId)

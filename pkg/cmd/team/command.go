@@ -1,5 +1,6 @@
 package team
 
+// Command holds the subcommands for the team command
 type Command struct {
 	Add    addTeam    `command:"add" description:"create new team"`
 	Get    getTeam    `command:"get" description:"get team details"`

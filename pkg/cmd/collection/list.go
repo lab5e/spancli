@@ -19,7 +19,7 @@ func (r *listCollection) Execute([]string) error {
 
 	collections, res, err := client.CollectionsApi.ListCollections(ctx).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	if collections.Collections == nil {

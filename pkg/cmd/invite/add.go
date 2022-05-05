@@ -17,7 +17,7 @@ func (r *addInvite) Execute([]string) error {
 
 	invite, res, err := client.TeamsApi.GenerateInvite(ctx, r.TeamID).Body(*userapi.NewInviteRequest()).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("created invite code for team %s: %s\n", r.TeamID, *invite.Code)

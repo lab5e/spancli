@@ -10,7 +10,7 @@ import (
 
 type listOutboxCmd struct {
 	ID     commonopt.CollectionAndDevice
-	List   commonopt.ListOptions
+	List   commonopt.QueryOptions
 	Format commonopt.ListFormat
 }
 
@@ -31,7 +31,7 @@ func (c *listOutboxCmd) Execute([]string) error {
 
 	list, res, err := req.Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 	t := helpers.NewTableOutput(c.Format)
 	t.SetTitle(fmt.Sprintf("Inbox for device %s on collection %s", c.ID.DeviceID, c.ID.CollectionID))

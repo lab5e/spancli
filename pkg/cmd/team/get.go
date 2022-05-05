@@ -17,7 +17,7 @@ func (r *getTeam) Execute([]string) error {
 
 	team, res, err := client.TeamsApi.RetrieveTeam(ctx, r.TeamID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	jsonData, err := json.MarshalIndent(team, "", "  ")

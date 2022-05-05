@@ -23,7 +23,7 @@ func (r *deleteMember) Execute([]string) error {
 
 	team, res, err := client.TeamsApi.DeleteMember(ctx, r.TeamID, r.UserID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("deleted member %s from %s\n", r.UserID, *team.TeamId)

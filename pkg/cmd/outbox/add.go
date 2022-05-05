@@ -46,7 +46,7 @@ func (o *addOutboxCmd) Execute(params []string) error {
 		},
 	).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("Message with ID %s added to outbox for device %s in collection %s\n", msg.GetMessageId(), msg.GetDeviceId(), msg.GetCollectionId())

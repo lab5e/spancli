@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-// ApiError creates an error instance based on error message and HTTP response returned from API call.
-func ApiError(res *http.Response, e error) error {
+// APIError creates an error instance based on error message and HTTP response returned from API call.
+func APIError(res *http.Response, e error) error {
 	var body []byte
 	var err error
 

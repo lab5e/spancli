@@ -19,7 +19,7 @@ func (r *getDevice) Execute([]string) error {
 
 	device, res, err := client.DevicesApi.RetrieveDevice(ctx, r.ID.CollectionID, r.ID.DeviceID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	t := helpers.NewTableOutput(r.Format)
@@ -33,7 +33,7 @@ func (r *getDevice) Execute([]string) error {
 
 	certs, res, err := client.DevicesApi.DeviceCertificate(ctx, r.ID.CollectionID, r.ID.DeviceID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	// List certificates separately

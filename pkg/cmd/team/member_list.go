@@ -21,7 +21,7 @@ func (r *listMembers) Execute([]string) error {
 
 	team, res, err := client.TeamsApi.RetrieveTeam(ctx, r.TeamID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	if r.Format.Format == "json" {

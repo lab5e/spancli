@@ -35,7 +35,7 @@ func (vc *validateCert) Execute([]string) error {
 			Certificate: spanapi.PtrString(base64.StdEncoding.EncodeToString(pem.EncodeToMemory(block))),
 		}).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	if !ver.GetValid() {

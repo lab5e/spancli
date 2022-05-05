@@ -17,7 +17,7 @@ func (r *acceptInvite) Execute([]string) error {
 
 	resp, res, err := client.TeamsApi.AcceptInvite(ctx).Body(userapi.AcceptInviteRequest{Code: &r.Code}).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("accepted invite to team %s", *resp.TeamId)

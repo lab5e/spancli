@@ -18,6 +18,7 @@ import (
 // A bit of a redirect here to avoid cyclic dependencies; the commands need to know the global parameters
 // so a separate variable in another package holds the globals.
 
+// Options is the main struct for the span command. Each command is put into this.
 type Options struct {
 	Args *global.Parameters
 
@@ -34,6 +35,8 @@ type Options struct {
 }
 
 var opt Options
+
+// Parser is the comand line parser used to parse the options
 var Parser *flags.Parser
 
 func init() {

@@ -8,7 +8,7 @@ import (
 	"github.com/lab5e/spancli/pkg/global"
 )
 
-// newSpanAPIClient creates a new SpanAPI client based on the command line options and/or
+// NewSpanAPIClient creates a new SpanAPI client based on the command line options and/or
 // defaults.
 func NewSpanAPIClient() (*spanapi.APIClient, context.Context, context.CancelFunc) {
 	config := spanapi.NewConfiguration()

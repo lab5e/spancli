@@ -19,7 +19,7 @@ func (r *listTeams) Execute([]string) error {
 
 	teamList, res, err := client.TeamsApi.ListTeams(ctx).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	if r.Format.Format == "json" {

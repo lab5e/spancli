@@ -34,7 +34,7 @@ func (c *watchOutboxCmd) Execute([]string) error {
 		if err != nil {
 			fmt.Printf("Got error polling outbox: %v. Stopping", err)
 			done()
-			return helpers.ApiError(res, err)
+			return helpers.APIError(res, err)
 		}
 		if populate {
 			for _, msg := range list.Messages {

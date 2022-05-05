@@ -17,7 +17,7 @@ func (r *getCollection) Execute([]string) error {
 
 	col, res, err := client.CollectionsApi.RetrieveCollection(ctx, r.ID.CollectionID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	t := helpers.NewTableOutput(r.Format)

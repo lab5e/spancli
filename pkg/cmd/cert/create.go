@@ -24,7 +24,7 @@ func (cc *createCert) Execute([]string) error {
 			DeviceId: &cc.ID.DeviceID,
 		}).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	// The response has certificate and chain in separate base64 encoded fields. The fields are PEM encoded

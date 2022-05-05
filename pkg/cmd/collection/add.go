@@ -29,7 +29,7 @@ func (r *addCollection) Execute([]string) error {
 
 	col, res, err := client.CollectionsApi.CreateCollection(ctx).Body(collection).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 	if r.Eval {
 		fmt.Printf("export SPAN_COLLECTION_ID=%s\n", col.GetCollectionId())

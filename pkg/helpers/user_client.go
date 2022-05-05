@@ -8,7 +8,7 @@ import (
 	"github.com/lab5e/spancli/pkg/global"
 )
 
-// newUserAPIClient creates a new UserAPI client based on the command line options
+// NewUserAPIClient creates a new UserAPI client based on the command line options
 // and/or defaults.
 func NewUserAPIClient() (*userapi.APIClient, context.Context, context.CancelFunc) {
 	config := userapi.NewConfiguration()

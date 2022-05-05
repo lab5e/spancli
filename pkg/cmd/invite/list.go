@@ -21,7 +21,7 @@ func (r *listInvite) Execute([]string) error {
 
 	invites, res, err := client.TeamsApi.ListInvites(ctx, r.TeamID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	if r.Format.Format == "json" {

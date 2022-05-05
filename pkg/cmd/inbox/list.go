@@ -10,7 +10,7 @@ import (
 
 type listInboxCmd struct {
 	ID     commonopt.CollectionAndOptionalDevice
-	List   commonopt.ListOptions
+	List   commonopt.QueryOptions
 	Format commonopt.ListFormat
 }
 
@@ -38,7 +38,7 @@ func (c *listInboxCmd) listDeviceInbox() error {
 
 	list, res, err := req.Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 	t := helpers.NewTableOutput(c.Format)
 	t.SetTitle(fmt.Sprintf("Inbox for device %s on collection %s", c.ID.DeviceID, c.ID.CollectionID))
@@ -72,7 +72,7 @@ func (c *listInboxCmd) listCollectionData() error {
 
 	list, res, err := req.Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 	t := helpers.NewTableOutput(c.Format)
 	t.SetTitle(fmt.Sprintf("Inbox for collection %s", c.ID.CollectionID))

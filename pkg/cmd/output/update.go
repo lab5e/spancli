@@ -55,7 +55,7 @@ func (c *updateOutput) Execute([]string) error {
 	}
 	o, res, err := client.OutputsApi.UpdateOutput(ctx, c.ID.CollectionID, c.OID.OutputID).Body(updateRequest).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("Updated output %s\n", o.GetOutputId())

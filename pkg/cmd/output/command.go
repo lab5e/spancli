@@ -1,5 +1,6 @@
 package output
 
+// Command holds the subcommands for the output command
 type Command struct {
 	Add        addOutput    `command:"add" description:"add output"`
 	ConfigHelp configHelp   `command:"config" alias:"cfg" description:"show configuration options"`

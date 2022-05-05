@@ -45,7 +45,7 @@ func (u *updateCollection) Execute([]string) error {
 		}
 		list, res, err := client.FotaApi.ListFirmware(ctx, u.ID.CollectionID).Execute()
 		if err != nil {
-			return helpers.ApiError(res, err)
+			return helpers.APIError(res, err)
 		}
 		id := ""
 		for _, fw := range list.Images {
@@ -61,7 +61,7 @@ func (u *updateCollection) Execute([]string) error {
 	}
 	collectionUpdated, res, err := client.CollectionsApi.UpdateCollection(ctx, u.ID.CollectionID).Body(update).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("updated collection %s\n", *collectionUpdated.CollectionId)

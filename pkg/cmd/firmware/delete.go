@@ -22,7 +22,7 @@ func (c *deleteFirmware) Execute([]string) error {
 
 	image, res, err := client.FotaApi.DeleteFirmware(ctx, c.ID.CollectionID, c.ImageID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("Deleted firmware image %s\n", image.GetImageId())

@@ -21,7 +21,7 @@ func (r *listDevices) Execute([]string) error {
 
 	resp, res, err := client.DevicesApi.ListDevices(ctx, r.ID.CollectionID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	if resp.Devices == nil {

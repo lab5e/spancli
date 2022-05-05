@@ -21,7 +21,7 @@ type monitorFirmware struct {
 
 type deviceState struct {
 	State             string
-	CurrentFirmwareId string
+	CurrentFirmwareID string
 	Version           string
 	SerialNumber      string
 	Manufacturer      string
@@ -31,7 +31,7 @@ type deviceState struct {
 func fromFirmware(fw *spanapi.FirmwareMetadata) deviceState {
 	return deviceState{
 		State:             fw.GetState(),
-		CurrentFirmwareId: fw.GetCurrentFirmwareId(),
+		CurrentFirmwareID: fw.GetCurrentFirmwareId(),
 		Version:           fw.GetFirmwareVersion(),
 		SerialNumber:      fw.GetSerialNumber(),
 		Manufacturer:      fw.GetManufacturer(),
@@ -43,7 +43,7 @@ func (s *deviceState) Changed(other deviceState) bool {
 	if s.State != other.State {
 		return true
 	}
-	if s.CurrentFirmwareId != other.CurrentFirmwareId {
+	if s.CurrentFirmwareID != other.CurrentFirmwareID {
 		return true
 	}
 	// This shouldn't really change unless the current firmware id changes but it might be out of sync if
@@ -71,7 +71,7 @@ func (c *monitorFirmware) Execute([]string) error {
 	for {
 		list, res, err := client.DevicesApi.ListDevices(ctx, c.ID.CollectionID).Execute()
 		if err != nil {
-			return helpers.ApiError(res, err)
+			return helpers.APIError(res, err)
 		}
 
 		for _, d := range list.Devices {
@@ -100,8 +100,8 @@ func (c *monitorFirmware) reportChange(deviceID string, oldState deviceState, ne
 	if oldState.State != newState.State {
 		fmt.Printf("Device %s changed state from %s to %s\n", deviceID, oldState.State, newState.State)
 	}
-	if oldState.CurrentFirmwareId != newState.CurrentFirmwareId {
-		fmt.Printf("Device %s changed current image from %s to %s\n", deviceID, oldState.CurrentFirmwareId, newState.CurrentFirmwareId)
+	if oldState.CurrentFirmwareID != newState.CurrentFirmwareID {
+		fmt.Printf("Device %s changed current image from %s to %s\n", deviceID, oldState.CurrentFirmwareID, newState.CurrentFirmwareID)
 	}
 	if oldState.Version != newState.Version {
 		fmt.Printf("Device %s changed version from %s to %s\n", deviceID, oldState.Version, newState.Version)

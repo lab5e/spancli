@@ -19,7 +19,7 @@ func (c *listFirmware) Execute([]string) error {
 
 	list, res, err := client.FotaApi.ListFirmware(ctx, c.ID.CollectionID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	t := helpers.NewTableOutput(c.Format)

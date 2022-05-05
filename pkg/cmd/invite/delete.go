@@ -23,7 +23,7 @@ func (r *deleteInvite) Execute([]string) error {
 
 	resp, res, err := client.TeamsApi.DeleteInvite(ctx, r.TeamID, r.Code).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("deleted invite %s from %s\n", *resp.Invite.Code, r.TeamID)

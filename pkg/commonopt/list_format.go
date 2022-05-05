@@ -1,5 +1,6 @@
 package commonopt
 
+// ListFormat holds common options for list formatting
 type ListFormat struct {
 	//lint:ignore SA5008 Multiple choices makes the linter unhappy
 	Format          string `long:"format" default:"text" description:"which output format to use" choice:"csv" choice:"html" choice:"markdown" choice:"text" choice:"json"`

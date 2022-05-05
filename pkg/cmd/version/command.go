@@ -6,10 +6,12 @@ import (
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
+// Command is the version command
 type Command struct {
 	// No parameters
 }
 
+// Execute runs the version command
 func (*Command) Execute([]string) error {
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()

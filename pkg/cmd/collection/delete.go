@@ -22,7 +22,7 @@ func (r *deleteCollection) Execute([]string) error {
 
 	col, res, err := client.CollectionsApi.DeleteCollection(ctx, r.ID.CollectionID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("deleted collection %s\n", *col.CollectionId)

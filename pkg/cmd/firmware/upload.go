@@ -40,7 +40,7 @@ func (c *uploadFirmware) Execute([]string) error {
 		},
 	).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 	if c.Eval {
 		fmt.Printf("export SPAN_IMAGE_ID=%s\n", fwimg.GetImageId())

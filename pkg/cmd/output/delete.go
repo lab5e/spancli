@@ -24,7 +24,7 @@ func (c *deleteOutput) Execute([]string) error {
 
 	o, res, err := client.OutputsApi.DeleteOutput(ctx, c.ID.CollectionID, c.OID.OutputID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("Removed output %s\n", o.GetOutputId())

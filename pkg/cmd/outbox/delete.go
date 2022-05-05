@@ -18,7 +18,7 @@ func (c *deleteOutboxCmd) Execute([]string) error {
 
 	msg, res, err := client.DevicesApi.DeleteDownstreamMessage(ctx, c.ID.CollectionID, c.ID.DeviceID, c.MessageID).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("Removed message with ID %s from outbox\n", msg.GetMessageId())

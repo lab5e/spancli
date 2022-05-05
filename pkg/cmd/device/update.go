@@ -54,7 +54,7 @@ func (r *updateDevice) Execute([]string) error {
 	if r.FirmwareVersion != "" {
 		list, res, err := client.FotaApi.ListFirmware(ctx, r.ID.CollectionID).Execute()
 		if err != nil {
-			return helpers.ApiError(res, err)
+			return helpers.APIError(res, err)
 		}
 		id := ""
 		for _, fw := range list.Images {
@@ -73,7 +73,7 @@ func (r *updateDevice) Execute([]string) error {
 
 	deviceUpdated, res, err := client.DevicesApi.UpdateDevice(ctx, r.ID.CollectionID, r.ID.DeviceID).Body(update).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 
 	fmt.Printf("updated device %s\n", *deviceUpdated.DeviceId)

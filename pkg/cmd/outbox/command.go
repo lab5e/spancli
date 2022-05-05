@@ -1,5 +1,6 @@
 package outbox
 
+// Command holds the subcommands for the outbox command
 type Command struct {
 	Add    addOutboxCmd    `command:"add" description:"add message to oubox"`
 	List   listOutboxCmd   `command:"list" alias:"ls" description:"list messages in outbox"`

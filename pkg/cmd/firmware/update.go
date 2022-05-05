@@ -31,7 +31,7 @@ func (c *updateFirmware) Execute([]string) error {
 	}
 	fw, res, err := client.FotaApi.UpdateFirmware(ctx, c.ID.CollectionID, c.ImageID).Body(updateRequest).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 	fmt.Printf("Updated firmware image %s\n", fw.GetImageId())
 	return nil

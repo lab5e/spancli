@@ -1,5 +1,6 @@
 package device
 
+// Command is the main device command
 type Command struct {
 	Add    addDevice    `command:"add" description:"create device"`
 	Get    getDevice    `command:"get" description:"get device"`

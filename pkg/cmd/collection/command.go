@@ -1,5 +1,6 @@
 package collection
 
+// Command holds subcommands for the collection command
 type Command struct {
 	Add    addCollection    `command:"add" description:"create new collection"`
 	Get    getCollection    `command:"get" description:"get collection details"`

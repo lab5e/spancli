@@ -45,7 +45,7 @@ func (c *addOutput) Execute([]string) error {
 		},
 	).Execute()
 	if err != nil {
-		return helpers.ApiError(res, err)
+		return helpers.APIError(res, err)
 	}
 	fmt.Printf("Created output %s on collection %s\n", o.GetOutputId(), c.ID.CollectionID)
 	return nil
