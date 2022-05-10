@@ -13,11 +13,11 @@ If you have Go installed you can install this utility by issuing the following c
 
 Alternatively you can download one of the prebuilt binaries from the [releases page](https://github.com/lab5e/spancli/releases)
 
-* [Windows](https://github.com/lab5e/spancli/releases/download/span.amd64-win.zip)
-* [Linux](https://github.com/lab5e/spancli/releases/download/span.amd64-linux.zip)
-* [MacOS (Intel-based)](https://github.com/lab5e/spancli/releases/download/span.amd64-macos.zip)
-* [MacOS (M1-based)](https://github.com/lab5e/spancli/releases/download/span.arm64-macos.zip)
-* [Raspberry Pi (ARM5)](https://github.com/lab5e/spancli/releases/download/span.arm5-rpi-linux.zip)
+* [Windows](https://github.com/lab5e/spancli/releases/download/v0.1.16/span.amd64-win.zip)
+* [Linux](https://github.com/lab5e/spancli/releases/download/v0.1.16/span.amd64-linux.zip)
+* [MacOS (Intel-based)](https://github.com/lab5e/spancli/releases/download/v0.1.16/span.amd64-macos.zip)
+* [MacOS (M1-based)](https://github.com/lab5e/spancli/releases/download/v0.1.16/span.arm64-macos.zip)
+* [Raspberry Pi (ARM5)](https://github.com/lab5e/spancli/releases/download/v0.1.16/span.arm5-rpi-linux.zip)
 
 Note that the executables are *not signed*. 
 
