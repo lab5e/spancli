@@ -2,18 +2,26 @@ ifeq ($(GOPATH),)
 GOPATH := $(HOME)/go
 endif
 
+ifeq ($(VERSION),)
+VERSION := $(shell git tag -l --sort=-version:refname | head -n 1 | cut -c 2-)
+endif
+
+LDFLAGS := "-X github.com/lab5e/spancli/pkg/global.Version=$(VERSION)"
+
 all: test vet span
 
 release: all
-	@cd cmd/span && GOOS=darwin go build -o ../../bin/macos/span && cd ../../bin/macos && tar czf ../span-macOS.tar.gz span
-	@cd cmd/span && GOOS=linux go build -o ../../bin/linux/span  && cd ../../bin/linux && tar czf ../span-linux.tar.gz span
-	@cd cmd/span && GOOS=windows go build -o ../../bin/windows/span.exe  && cd ../../bin/windows && zip ../span-windows.zip span.exe
+	@cd cmd/span && GOOS=linux GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o ../../bin/span.amd64-linux
+	@cd cmd/span && GOOS=darwin GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o ../../bin/span.amd64-macOS
+	@cd cmd/span && GOOS=darwin GOARCH=arm64 go build -ldflags=$(LDFLAGS) -o ../../bin/span.arm64-macOS
+	@cd cmd/span && GOOS=windows GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o ../../bin/span.amd64-win.exe
+	@cd cmd/span && GOOS=linux GOARCH=arm GOARM=5 go build -ldflags=$(LDFLAGS) -o ../../bin/span.arm5-rpi-linux
 
 clean:
 	@rm -rf bin
 
 span:
-	@cd cmd/span && go build -o ../../bin/span
+	@cd cmd/span && go build  -ldflags=$(LDFLAGS) -o ../../bin/span
 
 test:
 	@go test ./...

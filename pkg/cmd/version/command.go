@@ -3,6 +3,7 @@ package version
 import (
 	"fmt"
 
+	"github.com/lab5e/spancli/pkg/global"
 	"github.com/lab5e/spancli/pkg/helpers"
 )
 
@@ -20,7 +21,7 @@ func (*Command) Execute([]string) error {
 	if err != nil {
 		return err
 	}
-
+	fmt.Printf("Utility is version %s\n", global.Version)
 	fmt.Printf("Server reports version %s (%s)\n", *info.Version, *info.ReleaseName)
 	fmt.Printf("This utility assumes version %s\n", helpers.ExpectedVersion)
 	return nil
