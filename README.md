@@ -60,7 +60,8 @@ In order to get tab completion you can add this to your
 ## Requirements
 
 This was written in Go 1.18, so you should have Go 1.18 or a newer
-version of Go installed.
+version of Go installed if you want to edit the code.
+
 
 
 
