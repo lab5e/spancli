@@ -11,11 +11,20 @@ LDFLAGS := "-X github.com/lab5e/spancli/pkg/global.Version=$(VERSION)"
 all: test vet span
 
 release: all
-	@cd cmd/span && GOOS=linux GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o ../../bin/span.amd64-linux
-	@cd cmd/span && GOOS=darwin GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o ../../bin/span.amd64-macOS
-	@cd cmd/span && GOOS=darwin GOARCH=arm64 go build -ldflags=$(LDFLAGS) -o ../../bin/span.arm64-macOS
-	@cd cmd/span && GOOS=windows GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o ../../bin/span.amd64-win.exe
-	@cd cmd/span && GOOS=linux GOARCH=arm GOARM=5 go build -ldflags=$(LDFLAGS) -o ../../bin/span.arm5-rpi-linux
+	@cd cmd/span && GOOS=linux GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o ../../bin/span
+	@cd bin && zip span.amd64-linux.zip span && rm span
+
+	@cd cmd/span && GOOS=darwin GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o ../../bin/span
+	@cd bin && zip span.amd64-macos.zip span && rm span
+	
+	@cd cmd/span && GOOS=darwin GOARCH=arm64 go build -ldflags=$(LDFLAGS) -o ../../bin/span
+	@cd bin && zip span.arm64-macos.zip span && rm span
+
+	@cd cmd/span && GOOS=windows GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o ../../bin/span.exe
+	@cd bin && zip span.amd64-win.zip span.exe && rm span.exe
+
+	@cd cmd/span && GOOS=linux GOARCH=arm GOARM=5 go build -ldflags=$(LDFLAGS) -o ../../bin/span
+	@cd bin && zip span.arm5-rpi-linux.zip span && rm span
 
 clean:
 	@rm -rf bin
