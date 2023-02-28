@@ -5,4 +5,5 @@ env.sh
 *.der
 *.hex
 *.crt
+.DS_Store
 

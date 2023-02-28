@@ -7,10 +7,8 @@ import (
 	"github.com/lab5e/spancli/pkg/cmd/device"
 	"github.com/lab5e/spancli/pkg/cmd/firmware"
 	"github.com/lab5e/spancli/pkg/cmd/inbox"
-	"github.com/lab5e/spancli/pkg/cmd/invite"
 	"github.com/lab5e/spancli/pkg/cmd/outbox"
 	"github.com/lab5e/spancli/pkg/cmd/output"
-	"github.com/lab5e/spancli/pkg/cmd/team"
 	"github.com/lab5e/spancli/pkg/cmd/version"
 	"github.com/lab5e/spancli/pkg/global"
 )
@@ -22,8 +20,6 @@ import (
 type Options struct {
 	Args *global.Parameters
 
-	Team       team.Command       `command:"team" description:"team management"`
-	Invite     invite.Command     `command:"invite" description:"manage team invitations"`
 	Collection collection.Command `command:"collection" alias:"col" description:"collection management"`
 	Device     device.Command     `command:"device" alias:"dev" description:"device management"`
 	Inbox      inbox.Command      `command:"inbox" description:"Read messages from devices"`
