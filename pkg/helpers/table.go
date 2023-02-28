@@ -14,9 +14,9 @@ var spanCLIStyle = table.Style{
 	Name: "SpanCLIStyle",
 	Box:  table.StyleBoxLight,
 	Color: table.ColorOptions{
-		IndexColumn:  text.Colors{text.BgHiRed, text.FgBlack},
-		Footer:       text.Colors{text.BgRed, text.FgBlack},
-		Header:       text.Colors{text.BgRed, text.FgWhite},
+		IndexColumn:  text.Colors{text.BgHiBlue, text.FgBlack},
+		Footer:       text.Colors{text.BgBlue, text.FgBlack},
+		Header:       text.Colors{text.BgBlue, text.FgWhite},
 		Row:          text.Colors{text.BgHiWhite, text.FgBlack},
 		RowAlternate: text.Colors{text.BgWhite, text.FgBlack},
 	},
@@ -30,7 +30,7 @@ var spanCLIStyle = table.Style{
 	Options: table.OptionsNoBordersAndSeparators,
 	Title: table.TitleOptions{
 		Align:  text.AlignLeft,
-		Colors: text.Colors{text.BgRed, text.FgBlack},
+		Colors: text.Colors{text.BgBlue, text.FgBlack},
 		Format: text.FormatDefault,
 	},
 }
