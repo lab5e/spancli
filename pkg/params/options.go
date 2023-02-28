@@ -2,6 +2,7 @@ package params
 
 import (
 	"github.com/jessevdk/go-flags"
+	"github.com/lab5e/spancli/pkg/cmd/blob"
 	"github.com/lab5e/spancli/pkg/cmd/cert"
 	"github.com/lab5e/spancli/pkg/cmd/collection"
 	"github.com/lab5e/spancli/pkg/cmd/device"
@@ -27,6 +28,7 @@ type Options struct {
 	Output     output.Command     `command:"output" alias:"out" description:"output management"`
 	Cert       cert.Command       `command:"cert" description:"certificate management"`
 	Firmware   firmware.Command   `command:"fw" description:"firmware management"`
+	Blob       blob.Command       `command:"blob" description:"blob maanagement"`
 	Version    version.Command    `command:"version" description:"show version"`
 }
 
