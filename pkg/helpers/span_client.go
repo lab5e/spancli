@@ -18,7 +18,16 @@ func NewSpanAPIClient() (*spanapi.APIClient, context.Context, context.CancelFunc
 			spanapi.ServerConfiguration{URL: global.Options.OverrideEndpoint},
 		}
 	}
-	ctx, done := apitools.ContextWithAuthAndTimeout(global.Options.Token, global.Options.Timeout)
+	var ctx context.Context
+	var done context.CancelFunc
+
+	credentials := ReadCredentials()
+	if credentials != "" {
+		config.AddDefaultHeader("Authorization", "TOKEN "+credentials)
+	}
+	if global.Options.Token != "" {
+		ctx, done = apitools.ContextWithAuthAndTimeout(global.Options.Token, global.Options.Timeout)
+	}
 	client := spanapi.NewAPIClient(config)
 	CheckVersion(ctx, client)
 

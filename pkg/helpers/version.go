@@ -11,7 +11,7 @@ import (
 
 // ExpectedVersion is the expected API version we'll use. This is for informational
 // purposes only
-const ExpectedVersion = "4.2.0"
+const ExpectedVersion = "4.5.0"
 
 // CheckVersion checks the server version of the Span API and emits a warning
 // if there's a version mismatch.
@@ -41,8 +41,7 @@ func CheckVersion(ctx context.Context, client *spanapi.APIClient) {
 		fmt.Fprintf(os.Stderr, `
 		*** Warning:
 			Server reports version %s but this client was built with version %s.
-			The client might not work as intended. It's recommended to upgrade
-			to a more current version.
+			There might be version errors
 		`, *info.Version, ExpectedVersion)
 	}
 }

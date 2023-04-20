@@ -1,6 +1,8 @@
 package inbox
 
 import (
+	"crypto/rand"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 
@@ -20,9 +22,13 @@ type watchInboxCmd struct {
 }
 
 func (w *watchInboxCmd) Execute([]string) error {
+	buf := make([]byte, 8)
+	rand.Read(buf)
+	clientID := fmt.Sprintf("spancli_%d", binary.BigEndian.Uint64(buf))
 	opts := make([]apitools.MQTTOption, 0)
 	opts = append(opts, apitools.WithAPIToken(global.Options.Token))
 	opts = append(opts, apitools.WithCollectionID(w.ID.CollectionID))
+	opts = append(opts, apitools.WithClientID(clientID))
 	if global.Options.OverrideEndpoint != "" {
 		opts = append(opts, apitools.WithBrokerOverride(global.Options.MQTTOverrideEndpoint))
 	}

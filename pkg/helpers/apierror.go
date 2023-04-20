@@ -22,7 +22,7 @@ func APIError(res *http.Response, e error) error {
 
 	var errmsg struct {
 		Status  int    `json:"status"`
-		Message string `json:"message"`
+		Message string `json:"title"`
 	}
 
 	err = json.Unmarshal(body, &errmsg)

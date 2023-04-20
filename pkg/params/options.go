@@ -8,6 +8,8 @@ import (
 	"github.com/lab5e/spancli/pkg/cmd/device"
 	"github.com/lab5e/spancli/pkg/cmd/firmware"
 	"github.com/lab5e/spancli/pkg/cmd/inbox"
+	"github.com/lab5e/spancli/pkg/cmd/login"
+	"github.com/lab5e/spancli/pkg/cmd/logout"
 	"github.com/lab5e/spancli/pkg/cmd/outbox"
 	"github.com/lab5e/spancli/pkg/cmd/output"
 	"github.com/lab5e/spancli/pkg/cmd/version"
@@ -29,6 +31,8 @@ type Options struct {
 	Cert       cert.Command       `command:"cert" description:"certificate management"`
 	Firmware   firmware.Command   `command:"fw" description:"firmware management"`
 	Blob       blob.Command       `command:"blob" description:"blob maanagement"`
+	Login      login.Command      `command:"login" description:"Autenticate with the service"`
+	Logout     logout.Command     `command:"logout" description:"Log out from the service"`
 	Version    version.Command    `command:"version" description:"show version"`
 }
 

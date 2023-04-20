@@ -96,11 +96,7 @@ func getMetadata(d spanapi.Device) string {
 		return "(no metadata)"
 	}
 	if d.Metadata.Ciot != nil {
-		operator := d.Metadata.SimOperator
-		if operator == nil {
-			operator = &spanapi.NetworkOperator{}
-		}
-		return fmt.Sprintf("cell:%s  operator:%s  country:%s", d.Metadata.Ciot.GetCellId(), operator.GetNetwork(), operator.GetCountry())
+		return fmt.Sprintf("cell:%s  network:%s  country:%s", d.Metadata.Ciot.GetCellId(), d.Metadata.Ciot.GetNetwork(), d.Metadata.Ciot.GetCountry())
 	}
 	if d.Metadata.Inet != nil {
 		return fmt.Sprintf("certificate s/n:%s", d.Metadata.Inet.GetCertificateSerial())
