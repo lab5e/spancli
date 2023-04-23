@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/jedib0t/go-pretty/v6 v6.4.6
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/lab5e/go-spanapi/v4 v4.5.0-beta
+	github.com/lab5e/go-spanapi/v4 v4.5.0
 	github.com/lab5e/go-spanuserapi/v4 v4.5.0-beta
 	github.com/stretchr/testify v1.8.2
 )
