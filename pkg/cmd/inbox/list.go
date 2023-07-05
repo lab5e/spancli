@@ -15,6 +15,11 @@ type listInboxCmd struct {
 }
 
 func (c *listInboxCmd) Execute([]string) error {
+	// when outputting CSV files we want the whole payload
+	if c.Format.Format == "csv" {
+		c.Format.MaxPayloadWdith = 0
+	}
+
 	if c.ID.DeviceID == "" {
 		return c.listCollectionData()
 	}
@@ -40,6 +45,7 @@ func (c *listInboxCmd) listDeviceInbox() error {
 	if err != nil {
 		return helpers.APIError(res, err)
 	}
+
 	t := helpers.NewTableOutput(c.Format)
 	t.SetTitle(fmt.Sprintf("Inbox for device %s on collection %s", c.ID.DeviceID, c.ID.CollectionID))
 	t.AppendHeader(table.Row{"Message ID", "Received", "Transport", "Payload"})
