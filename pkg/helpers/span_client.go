@@ -18,18 +18,21 @@ func NewSpanAPIClient() (*spanapi.APIClient, context.Context, context.CancelFunc
 			spanapi.ServerConfiguration{URL: global.Options.OverrideEndpoint},
 		}
 	}
-	var ctx context.Context
-	var done context.CancelFunc
+
+	// This is pretty inconsistent: either we put the authorization in the
+	// authorization header or we mess around with the context object.  This is
+	// pretty silly.
+	ctx, cancel := context.WithTimeout(context.Background(), global.Options.Timeout)
 
 	credentials := ReadCredentials()
 	if credentials != "" {
 		config.AddDefaultHeader("Authorization", "TOKEN "+credentials)
 	}
 	if global.Options.Token != "" {
-		ctx, done = apitools.ContextWithAuthAndTimeout(global.Options.Token, global.Options.Timeout)
+		ctx, cancel = apitools.ContextWithAuthAndTimeout(global.Options.Token, global.Options.Timeout)
 	}
 	client := spanapi.NewAPIClient(config)
 	CheckVersion(ctx, client)
 
-	return client, ctx, done
+	return client, ctx, cancel
 }
