@@ -23,13 +23,6 @@ var parms = []string{
 	`otherexisting:""`,
 }
 
-var meta = &map[string]string{
-	"foo":           "something else",
-	"existing":      "some value",
-	"otherexisting": "some other value",
-	"untouched":     "still here",
-}
-
 func TestTagRegex(t *testing.T) {
 	for _, s := range parms {
 		res := tagRegex.FindStringSubmatch(s)
