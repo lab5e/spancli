@@ -65,12 +65,25 @@ func (r *repo) Keywords() string {
 	return strings.Join(r.Topics, ",")
 }
 
+// HasTopic returns true if the topic is set on the repo
+func (r *repo) HasTopic(topic string) bool {
+	if topic == "" {
+		return true
+	}
+	for _, t := range r.Topics {
+		if t == topic {
+			return true
+		}
+	}
+	return false
+}
+
 // ListSamples lists all samples in the Lab5e GitHub repository. The
 // samples must be tagged with the keywords "sample" to show up.
 //
 // Samples are named with <language>-<description> and each sample is in its own
 // repository.
-func ListSamples(format commonopt.ListFormat) error {
+func ListSamples(format commonopt.ListFormat, filterTopic string) error {
 	fmt.Println("Reading samples...")
 	//
 	client := &http.Client{
@@ -100,17 +113,17 @@ func ListSamples(format commonopt.ListFormat) error {
 		"Name",
 		"Description",
 		"Keywords",
-		"Default Branch",
 	})
 	for _, sample := range repoList {
-
+		if !sample.HasTopic(filterTopic) {
+			continue
+		}
 		if sample.IsSample() {
 			t.AppendRow(table.Row{
 				sample.Language(),
 				sample.Name,
 				sample.Description,
 				sample.Keywords(),
-				sample.DefaultBranch,
 			})
 		}
 	}

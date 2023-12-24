@@ -34,7 +34,7 @@ type Options struct {
 	Blob       blob.Command       `command:"blob" description:"blob maanagement"`
 	Login      login.Command      `command:"login" description:"Autenticate with the service"`
 	Logout     logout.Command     `command:"logout" description:"Log out from the service"`
-	Sample     sample.Command     `command:"sample" alias:"ex" description:"Sample code"`
+	Samples    sample.Command     `command:"samples" alias:"ex" description:"Sample code"`
 	Version    version.Command    `command:"version" description:"show version"`
 }
 
