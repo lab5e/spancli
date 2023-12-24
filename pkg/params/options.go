@@ -12,6 +12,7 @@ import (
 	"github.com/lab5e/spancli/pkg/cmd/logout"
 	"github.com/lab5e/spancli/pkg/cmd/outbox"
 	"github.com/lab5e/spancli/pkg/cmd/output"
+	"github.com/lab5e/spancli/pkg/cmd/sample"
 	"github.com/lab5e/spancli/pkg/cmd/version"
 	"github.com/lab5e/spancli/pkg/global"
 )
@@ -33,6 +34,7 @@ type Options struct {
 	Blob       blob.Command       `command:"blob" description:"blob maanagement"`
 	Login      login.Command      `command:"login" description:"Autenticate with the service"`
 	Logout     logout.Command     `command:"logout" description:"Log out from the service"`
+	Sample     sample.Command     `command:"sample" alias:"ex" description:"Sample code"`
 	Version    version.Command    `command:"version" description:"show version"`
 }
 
