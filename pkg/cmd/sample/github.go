@@ -78,6 +78,29 @@ func (r *repo) HasTopic(topic string) bool {
 	return false
 }
 
+func sampleRepos() ([]repo, error) {
+	client := &http.Client{
+		Timeout: time.Second * 60,
+	}
+	resp, err := client.Get(repositoryAPI)
+	if err != nil {
+		return nil, fmt.Errorf("error reading GitHub repositories: %w", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("expected 200 OK but got %d %s from GitHub API", resp.StatusCode, resp.Status)
+	}
+
+	buf, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	var repoList []repo
+	if err := json.Unmarshal(buf, &repoList); err != nil {
+		return nil, err
+	}
+	return repoList, nil
+}
+
 // ListSamples lists all samples in the Lab5e GitHub repository. The
 // samples must be tagged with the keywords "sample" to show up.
 //
@@ -86,23 +109,8 @@ func (r *repo) HasTopic(topic string) bool {
 func ListSamples(format commonopt.ListFormat, filterTopic string) error {
 	fmt.Println("Reading samples...")
 	//
-	client := &http.Client{
-		Timeout: time.Second * 60,
-	}
-	resp, err := client.Get(repositoryAPI)
+	repoList, err := sampleRepos()
 	if err != nil {
-		return fmt.Errorf("error reading GitHub repositories: %w", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("expected 200 OK but got %d %s from GitHub API", resp.StatusCode, resp.Status)
-	}
-
-	buf, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	var repoList []repo
-	if err := json.Unmarshal(buf, &repoList); err != nil {
 		return err
 	}
 
