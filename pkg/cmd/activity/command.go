@@ -29,9 +29,9 @@ func (w *watchActivityCommand) Execute([]string) error {
 			return errors.New("not authenticated")
 		}
 	}
-
 	ws, err := NewActivityEventStream(global.Options.Token, jwtToken, w.ID.CollectionID)
 	if err != nil {
+		fmt.Printf("Error creating activity stream: %v", err)
 		return err
 	}
 
@@ -39,6 +39,10 @@ func (w *watchActivityCommand) Execute([]string) error {
 	for {
 		defer ws.Close()
 		res, err := ws.Recv()
+		if err != nil {
+			fmt.Printf("Error reading: %v", err)
+			return err
+		}
 		if res.CollectionId == nil {
 			continue
 		}
@@ -46,10 +50,6 @@ func (w *watchActivityCommand) Execute([]string) error {
 			if res.GetDeviceId() != w.ID.DeviceID {
 				continue
 			}
-		}
-		if err != nil {
-			fmt.Printf("Error receiving activity stream: %v", err)
-			return err
 		}
 		if err := encoder.Encode(res); err != nil {
 			fmt.Printf("Error encoding JSON: %v", err)

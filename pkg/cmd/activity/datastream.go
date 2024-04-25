@@ -35,7 +35,7 @@ func NewActivityEventStream(token string, jwt string, collectionID string) (*Act
 	}
 
 	if token == "" && jwt != "" {
-		if err := ws.WriteJSON(&websocketAuth{
+		if err := ws.WriteJSON(websocketAuth{
 			JWT:          jwt,
 			CollectionID: collectionID,
 			DeviceID:     "",
