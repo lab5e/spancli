@@ -2,6 +2,7 @@ package params
 
 import (
 	"github.com/jessevdk/go-flags"
+	"github.com/lab5e/spancli/pkg/cmd/activity"
 	"github.com/lab5e/spancli/pkg/cmd/blob"
 	"github.com/lab5e/spancli/pkg/cmd/cert"
 	"github.com/lab5e/spancli/pkg/cmd/collection"
@@ -36,6 +37,7 @@ type Options struct {
 	Logout     logout.Command     `command:"logout" description:"Log out from the service"`
 	Samples    sample.Command     `command:"samples" alias:"ex" description:"Sample code"`
 	Version    version.Command    `command:"version" description:"show version"`
+	Activity   activity.Command   `command:"activity" description:"monitor activity"`
 }
 
 var opt Options

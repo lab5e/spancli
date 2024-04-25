@@ -6,10 +6,12 @@ require (
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/jedib0t/go-pretty/v6 v6.5.4
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/lab5e/go-spanapi/v4 v4.8.0
+	github.com/lab5e/go-spanapi/v4 v4.9.5
 	github.com/lab5e/go-spanuserapi/v4 v4.5.0-beta
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/term v0.16.0
+	github.com/gorilla/websocket v1.5.1
+
 )
 
 require (
@@ -24,7 +26,6 @@ require (
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.5.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
