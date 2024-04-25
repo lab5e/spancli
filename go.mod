@@ -4,13 +4,13 @@ go 1.20
 
 require (
 	github.com/go-git/go-git/v5 v5.11.0
+	github.com/gorilla/websocket v1.5.1
 	github.com/jedib0t/go-pretty/v6 v6.5.4
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/lab5e/go-spanapi/v4 v4.9.5
 	github.com/lab5e/go-spanuserapi/v4 v4.5.0-beta
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/term v0.16.0
-	github.com/gorilla/websocket v1.5.1
+	golang.org/x/term v0.18.0
 
 )
 
@@ -35,11 +35,11 @@ require (
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/skeema/knownhosts v1.2.1 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
-	golang.org/x/crypto v0.18.0 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/tools v0.17.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
