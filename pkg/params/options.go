@@ -8,6 +8,7 @@ import (
 	"github.com/lab5e/spancli/pkg/cmd/collection"
 	"github.com/lab5e/spancli/pkg/cmd/device"
 	"github.com/lab5e/spancli/pkg/cmd/firmware"
+	"github.com/lab5e/spancli/pkg/cmd/gateway"
 	"github.com/lab5e/spancli/pkg/cmd/inbox"
 	"github.com/lab5e/spancli/pkg/cmd/login"
 	"github.com/lab5e/spancli/pkg/cmd/logout"
@@ -38,6 +39,7 @@ type Options struct {
 	Samples    sample.Command     `command:"samples" alias:"ex" description:"Sample code"`
 	Version    version.Command    `command:"version" description:"show version"`
 	Activity   activity.Command   `command:"activity" description:"monitor activity"`
+	Gateway    gateway.Command    `command:"gateway" alias:"gw" description:"gateway management"`
 }
 
 var opt Options
