@@ -10,18 +10,30 @@ import (
 )
 
 type createCert struct {
-	ID   commonopt.CollectionAndDevice
+	ID   commonopt.CollectionAndDeviceOrGateway
 	Cert string `long:"cert" description:"certificate file name" default:"cert.crt" required:"yes"`
 	Key  string `long:"key" description:"private key file" default:"key.pem" required:"yes"`
 }
 
 func (cc *createCert) Execute([]string) error {
+	if !cc.ID.Valid() {
+		return fmt.Errorf("either device or gateway must be specified")
+	}
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
+	var deviceIDptr *string = nil
+	var gatewayIDptr *string = nil
+	if cc.ID.DeviceID != "" {
+		deviceIDptr = &cc.ID.DeviceID
+	}
+	if cc.ID.GatewayID != "" {
+		gatewayIDptr = &cc.ID.GatewayID
+	}
 	cert, res, err := client.CertificatesApi.CreateCertificate(ctx, cc.ID.CollectionID).Body(
 		spanapi.CreateCertificateRequest{
-			DeviceId: &cc.ID.DeviceID,
+			DeviceId:  deviceIDptr,
+			GatewayId: gatewayIDptr,
 		}).Execute()
 	if err != nil {
 		return helpers.APIError(res, err)

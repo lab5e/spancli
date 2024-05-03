@@ -19,7 +19,7 @@ import (
 // contain a lot of additional fields but this is mostly for demostration purposes so most fields use
 // the defaults.
 type csrCert struct {
-	ID           commonopt.CollectionAndDevice
+	ID           commonopt.CollectionAndDeviceOrGateway
 	Cert         string `long:"cert" description:"local certificate file" required:"yes" default:"cert.crt"`
 	Key          string `long:"key" description:"local key file" required:"yes" default:"key.pem"`
 	Email        string `long:"email" description:"email address for CSR" required:"yes"`
@@ -27,6 +27,9 @@ type csrCert struct {
 }
 
 func (cc *csrCert) Execute([]string) error {
+	if !cc.ID.Valid() {
+		return fmt.Errorf("either device id or gateway id must be specified")
+	}
 	fmt.Println("Generating private key...")
 	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
@@ -57,10 +60,19 @@ func (cc *csrCert) Execute([]string) error {
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
+	var devicePtr *string = nil
+	var gatewayPtr *string = nil
+	if cc.ID.DeviceID != "" {
+		devicePtr = spanapi.PtrString(cc.ID.DeviceID)
+	}
+	if cc.ID.GatewayID != "" {
+		gatewayPtr = spanapi.PtrString(cc.ID.GatewayID)
+	}
 	csrResponse, res, err := client.CertificatesApi.SignCertificate(ctx, cc.ID.CollectionID).Body(
 		spanapi.SignCertificateRequest{
-			DeviceId: spanapi.PtrString(cc.ID.DeviceID),
-			Csr:      spanapi.PtrString(base64.StdEncoding.EncodeToString(csrBytes)),
+			DeviceId:  devicePtr,
+			GatewayId: gatewayPtr,
+			Csr:       spanapi.PtrString(base64.StdEncoding.EncodeToString(csrBytes)),
 		}).Execute()
 	if err != nil {
 		return helpers.APIError(res, err)

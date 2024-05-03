@@ -13,11 +13,14 @@ import (
 )
 
 type validateCert struct {
-	ID   commonopt.CollectionAndDevice
+	ID   commonopt.CollectionAndDeviceOrGateway
 	Cert string `long:"cert" description:"local certificate file" required:"yes" default:"cert.crt"`
 }
 
 func (vc *validateCert) Execute([]string) error {
+	if !vc.ID.Valid() {
+		return fmt.Errorf("either device id or gateway id must be specified")
+	}
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
@@ -29,9 +32,18 @@ func (vc *validateCert) Execute([]string) error {
 	// Pull just the certificate if this file contains multiple certificates
 	block, _ := pem.Decode(certBytes)
 
+	var devicePtr *string = nil
+	var gatewayPtr *string = nil
+	if vc.ID.DeviceID != "" {
+		devicePtr = spanapi.PtrString(vc.ID.DeviceID)
+	}
+	if vc.ID.GatewayID != "" {
+		gatewayPtr = spanapi.PtrString(vc.ID.GatewayID)
+	}
 	ver, res, err := client.CertificatesApi.VerifyCertificate(ctx, vc.ID.CollectionID).Body(
 		spanapi.VerifyCertificateRequest{
-			DeviceId:    spanapi.PtrString(vc.ID.DeviceID),
+			DeviceId:    devicePtr,
+			GatewayId:   gatewayPtr,
 			Certificate: spanapi.PtrString(base64.StdEncoding.EncodeToString(pem.EncodeToMemory(block))),
 		}).Execute()
 	if err != nil {
