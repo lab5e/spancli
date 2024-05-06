@@ -14,10 +14,11 @@ type websocketAuth struct {
 	JWT          string `json:"jwt"`
 	CollectionID string `json:"collectionId"`
 	DeviceID     string `json:"deviceId"`
+	GatewayID    string `json:"gatewayId"`
 }
 
 // NewActivityEventStream creates a live activity event stream from the API
-func NewActivityEventStream(token string, jwt string, collectionID string) (*ActivityEventStream, error) {
+func NewActivityEventStream(token string, jwt string, collectionID string, deviceID string, gatewayID string) (*ActivityEventStream, error) {
 	wsURL := fmt.Sprintf("wss://api.lab5e.com/span/collections/%s/activity", collectionID)
 	if global.Options.OverrideEndpoint != "" {
 		wsURL = fmt.Sprintf("ws://%s/span/collections/%s/activity", global.Options.OverrideEndpoint, collectionID)
@@ -38,7 +39,8 @@ func NewActivityEventStream(token string, jwt string, collectionID string) (*Act
 		if err := ws.WriteJSON(websocketAuth{
 			JWT:          jwt,
 			CollectionID: collectionID,
-			DeviceID:     "",
+			DeviceID:     deviceID,
+			GatewayID:    gatewayID,
 		}); err != nil {
 			ws.Close()
 			return nil, err

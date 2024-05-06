@@ -17,7 +17,7 @@ type Command struct {
 }
 
 type watchActivityCommand struct {
-	ID commonopt.CollectionAndOptionalDevice
+	ID commonopt.CollectionAndDeviceOrGateway
 }
 
 func (w *watchActivityCommand) Execute([]string) error {
@@ -29,7 +29,7 @@ func (w *watchActivityCommand) Execute([]string) error {
 			return errors.New("not authenticated")
 		}
 	}
-	ws, err := NewActivityEventStream(global.Options.Token, jwtToken, w.ID.CollectionID)
+	ws, err := NewActivityEventStream(global.Options.Token, jwtToken, w.ID.CollectionID, w.ID.DeviceID, w.ID.GatewayID)
 	if err != nil {
 		fmt.Printf("Error creating activity stream: %v", err)
 		return err
