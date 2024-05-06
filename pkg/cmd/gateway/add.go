@@ -28,7 +28,7 @@ func (a *addGateway) Execute([]string) error {
 		Type:   &gwType,
 		Name:   spanapi.PtrString(a.Name),
 		Tags:   a.Tags.AsMap(),
-		Config: a.asConfigMap(),
+		Config: asConfigMap(a.Config),
 	}
 
 	gw, res, err := client.GatewaysApi.CreateGateway(ctx, a.ID.CollectionID).Body(create).Execute()
@@ -48,10 +48,10 @@ func (a *addGateway) Execute([]string) error {
 //	foo:""
 var configRegex = regexp.MustCompile(`^\s*(\S+):("?)(.*?)("?)\s*$`)
 
-func (a *addGateway) asConfigMap() *spanapi.GatewayConfig {
+func asConfigMap(config []string) *spanapi.GatewayConfig {
 	params := make(map[string]string)
 
-	for _, elt := range a.Config {
+	for _, elt := range config {
 		res := configRegex.FindStringSubmatch(elt)
 		if len(res) != 5 {
 			continue
