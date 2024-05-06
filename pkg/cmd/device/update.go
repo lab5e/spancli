@@ -16,7 +16,9 @@ type updateDevice struct {
 	IMSI            string `long:"imsi" description:"IMSI of device SIM"`
 	IMEI            string `long:"imei" description:"IMEI of device"`
 	Tags            commonopt.Tags
-	FirmwareVersion string `long:"firmware-version" description:"set the target version for firmware"`
+	FirmwareVersion string   `long:"firmware-version" description:"set the target version for firmware"`
+	GatewayID       string   `long:"gateway-id" description:"configuration for gateway" `
+	ConfigParam     []string `long:"config" description:"configuration parameters"`
 }
 
 func (r *updateDevice) Execute([]string) error {
@@ -47,6 +49,20 @@ func (r *updateDevice) Execute([]string) error {
 		update.Tags = &m
 	}
 
+	if len(r.ConfigParam) > 0 && r.GatewayID == "" {
+		return fmt.Errorf("must specify gateway ID when setting config")
+	}
+
+	if len(r.ConfigParam) > 0 {
+		if update.Config == nil {
+			update.Config = &spanapi.DeviceConfig{}
+		}
+		update.Config.Gateway = &map[string]spanapi.GatewayDeviceConfig{
+			r.GatewayID: {
+				Params: helpers.AsMap(r.ConfigParam),
+			},
+		}
+	}
 	if r.NewCollectionID != "" {
 		update.CollectionId = spanapi.PtrString(r.NewCollectionID)
 	}

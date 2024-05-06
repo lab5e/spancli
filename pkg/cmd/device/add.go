@@ -13,8 +13,10 @@ type addDevice struct {
 	IMSI             string `long:"imsi" description:"IMSI of device SIM"`
 	IMEI             string `long:"imei" description:"IMEI of device"`
 	Tags             commonopt.Tags
-	Eval             bool   `long:"eval" description:"Output device ID as environment variable"`
-	FirmwareTargetID string `long:"firmware-target-id" description:"set the target firmware id"`
+	Eval             bool     `long:"eval" description:"Output device ID as environment variable"`
+	FirmwareTargetID string   `long:"firmware-target-id" description:"set the target firmware id"`
+	GatewayID        string   `long:"gateway-id" description:"configuration for gateway" `
+	ConfigParam      []string `long:"config" description:"configuration parameters"`
 }
 
 func (r *addDevice) Execute([]string) error {
@@ -27,11 +29,21 @@ func (r *addDevice) Execute([]string) error {
 			TargetFirmwareId: &r.FirmwareTargetID,
 		},
 	}
+	if len(r.ConfigParam) > 0 && r.GatewayID == "" {
+		return fmt.Errorf("must specify gateway ID when configuring device")
+	}
+	device.Config = &spanapi.DeviceConfig{}
 	if r.IMEI != "" && r.IMSI != "" {
-		device.Config = &spanapi.DeviceConfig{
-			Ciot: &spanapi.CellularIoTConfig{
-				Imei: spanapi.PtrString(r.IMEI),
-				Imsi: spanapi.PtrString(r.IMSI),
+		device.Config.Ciot = &spanapi.CellularIoTConfig{
+			Imei: spanapi.PtrString(r.IMEI),
+			Imsi: spanapi.PtrString(r.IMSI),
+		}
+	}
+	if r.GatewayID != "" {
+		device.Config.Gateway = &map[string]spanapi.GatewayDeviceConfig{
+			r.GatewayID: {
+				GatewayId: spanapi.PtrString(r.GatewayID),
+				Params:    helpers.AsMap(r.ConfigParam),
 			},
 		}
 	}

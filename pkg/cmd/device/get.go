@@ -47,6 +47,16 @@ func (r *getDevice) Execute([]string) error {
 			helpers.DateFormat(v.GetExpires(), r.Format.NumericDate),
 		})
 	}
+
+	if device.Config != nil && device.Config.Gateway != nil {
+		for id, config := range *device.Config.Gateway {
+			t.AppendRow(table.Row{
+				"Config " + id,
+				helpers.TagsToString(*config.Params),
+			})
+		}
+
+	}
 	helpers.RenderTable(t, r.Format.Format)
 	return nil
 }

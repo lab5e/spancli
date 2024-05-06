@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"fmt"
-	"regexp"
 
 	"github.com/lab5e/go-spanapi/v4"
 	"github.com/lab5e/spancli/pkg/commonopt"
@@ -23,12 +22,16 @@ func (a *addGateway) Execute([]string) error {
 	client, ctx, cancel := helpers.NewSpanAPIClient()
 	defer cancel()
 
-	gwType := spanapi.GatewayType("user")
+	gwType := spanapi.GATEWAYTYPE_CUSTOM
 	create := spanapi.CreateGatewayRequest{
-		Type:   &gwType,
-		Name:   spanapi.PtrString(a.Name),
-		Tags:   a.Tags.AsMap(),
-		Config: asConfigMap(a.Config),
+		Type: &gwType,
+		Name: spanapi.PtrString(a.Name),
+		Tags: a.Tags.AsMap(),
+		Config: &spanapi.GatewayConfig{
+			User: &spanapi.GatewayCustomConfig{
+				Params: helpers.AsMap(a.Config),
+			},
+		},
 	}
 
 	gw, res, err := client.GatewaysApi.CreateGateway(ctx, a.ID.CollectionID).Body(create).Execute()
@@ -36,31 +39,6 @@ func (a *addGateway) Execute([]string) error {
 		return helpers.APIError(res, err)
 	}
 
-	fmt.Printf("Gateway %s created successfully", gw.GetGatewayId())
+	fmt.Printf("Gateway %s created\n", gw.GetGatewayId())
 	return nil
-}
-
-// configRegex matches tags of the form:
-//
-//	foo:bar
-//	foo:"bar baz"
-//	foo:
-//	foo:""
-var configRegex = regexp.MustCompile(`^\s*(\S+):("?)(.*?)("?)\s*$`)
-
-func asConfigMap(config []string) *spanapi.GatewayConfig {
-	params := make(map[string]string)
-
-	for _, elt := range config {
-		res := configRegex.FindStringSubmatch(elt)
-		if len(res) != 5 {
-			continue
-		}
-		params[res[1]] = res[3]
-	}
-	return &spanapi.GatewayConfig{
-		User: &spanapi.GatewayCustomConfig{
-			Params: &params,
-		},
-	}
 }

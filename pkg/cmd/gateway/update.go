@@ -19,12 +19,20 @@ func (u *updateGateway) Execute([]string) error {
 	client, ctx, done := helpers.NewSpanAPIClient()
 	defer done()
 
-	updateRequest := spanapi.UpdateGatewayRequest{
-		Name:   spanapi.PtrString(u.Name),
-		Tags:   u.Tags.AsMap(),
-		Config: asConfigMap(u.Config),
+	updateRequest := spanapi.UpdateGatewayRequest{}
+	if u.Name != "" {
+		updateRequest.Name = spanapi.PtrString(u.Name)
 	}
-
+	if len(u.Tags.Tags) > 0 {
+		updateRequest.Tags = u.Tags.AsMap()
+	}
+	if len(u.Config) > 0 {
+		updateRequest.Config = &spanapi.GatewayConfig{
+			User: &spanapi.GatewayCustomConfig{
+				Params: helpers.AsMap(u.Config),
+			},
+		}
+	}
 	gw, res, err := client.GatewaysApi.UpdateGateway(ctx, u.ID.CollectionID, u.ID.GatewayID).Body(updateRequest).Execute()
 	if err != nil {
 		return helpers.APIError(res, err)
