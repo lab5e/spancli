@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/gorilla/websocket"
 	"github.com/lab5e/go-spanapi/v4"
@@ -21,7 +22,12 @@ type websocketAuth struct {
 func NewActivityEventStream(token string, jwt string, collectionID string, deviceID string, gatewayID string) (*ActivityEventStream, error) {
 	wsURL := fmt.Sprintf("wss://api.lab5e.com/span/collections/%s/activity", collectionID)
 	if global.Options.OverrideEndpoint != "" {
-		wsURL = fmt.Sprintf("ws://%s/span/collections/%s/activity", global.Options.OverrideEndpoint, collectionID)
+		u, err := url.Parse(global.Options.OverrideEndpoint)
+		if err != nil {
+			return nil, err
+		}
+
+		wsURL = fmt.Sprintf("ws://%s/span/collections/%s/activity", u.Host, collectionID)
 	}
 
 	header := http.Header{}
