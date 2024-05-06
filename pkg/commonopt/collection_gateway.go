@@ -12,7 +12,7 @@ type CollectionAndGateway struct {
 type CollectionAndDeviceOrGateway struct {
 	CollectionID string `long:"collection-id" env:"SPAN_COLLECTION_ID" description:"Span collection ID" required:"yes"`
 	DeviceID     string `long:"device-id" env:"SPAN_DEVICE_ID" description:"device id" required:"no"`
-	GatewayID    string `long:"gateway-id" env:"SPAN_GATEWAY_ID" description:"gateway id" required:"yes"`
+	GatewayID    string `long:"gateway-id" env:"SPAN_GATEWAY_ID" description:"gateway id" required:"no"`
 }
 
 func (c *CollectionAndDeviceOrGateway) Valid() bool {
