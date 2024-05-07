@@ -84,11 +84,19 @@ func getConfig(d spanapi.Device) string {
 	if d.Config == nil {
 		return ""
 	}
-	if d.Config.HasCiot() && d.Config.Ciot.GetImsi() != "" {
-		return fmt.Sprintf("imsi:%s imei:%s", d.Config.Ciot.GetImsi(), d.Config.Ciot.GetImei())
+	ret := ""
+	if d.Config.HasCiot() {
+		ret += fmt.Sprintf("[ciot imsi:%s imei:%s] ", d.Config.Ciot.GetImsi(), d.Config.Ciot.GetImei())
 	}
-	// No config for inet devices
-	return ""
+	if d.Config.HasInet() {
+		ret += "[inet] "
+	}
+	if d.Config.HasGateway() {
+		for id := range *d.Config.Gateway {
+			ret += fmt.Sprintf("[gw %s] ", id)
+		}
+	}
+	return ret
 }
 
 func getMetadata(d spanapi.Device) string {
