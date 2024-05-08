@@ -11,7 +11,7 @@ import (
 
 // ExpectedVersion is the expected API version we'll use. This is for informational
 // purposes only
-const ExpectedVersion = "4.5.0"
+const ExpectedVersion = "4.6.0"
 
 // CheckVersion checks the server version of the Span API and emits a warning
 // if there's a version mismatch.
