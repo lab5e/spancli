@@ -24,7 +24,8 @@ func (c *Command) Execute([]string) error {
 	defer done()
 	_, httpRes, err := userApi.SessionApi.Logout(ctx).Body(make(map[string]interface{})).Execute()
 
-	if err != nil {
+	// Ignore if status code is < 500; the token might be invalid
+	if err != nil && httpRes.StatusCode > 499 {
 		helpers.APIError(httpRes, err)
 		return err
 	}
